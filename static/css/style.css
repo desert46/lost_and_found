@@ -1,0 +1,239 @@
+
+
+body{
+    background-color: var(--dark-emerald);
+    font-family: "Roboto", sans-serif;
+    margin: 0;
+    padding: 0;
+    color: black;
+}
+.title{
+    text-align: center;
+}
+.space{
+    height: 50px;
+}
+/* Colours start */
+:root {
+    --dark-teal: #073b3aff;
+    --dark-emerald: #0b6e4fff;
+    --medium-jungle: #08a045ff;
+    --moss-green: #6bbf59ff;
+    --soft-fawn: #ddb771ff;
+    --transition-time: 0.4s;
+}
+/* Colours end */
+
+
+
+/* Hero Image style start */
+.hero_image{
+    background-image: url("../images/placeholder.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 36rem;
+    background-position: center;
+    border-bottom: 5px solid white;
+    text-align: center;
+}
+.hero_title{
+    margin: 0;
+    font-size: 6rem;
+    color: white;
+    padding-top: 10%;
+}
+.hero_text{
+    color: #FFFFFF;
+    font-size: 2rem;
+    font-weight: bold;
+}
+.signup_hero_button a{
+    font-weight: bold;
+    background-color: var(--moss-green);
+    padding: 1rem 2rem;
+    border: 0px solid white;
+    border-radius: 50px;
+    color: #FFFFFF;
+    text-decoration: none;
+    transition: var(--transition-time);
+}
+.signup_hero_button a:hover{
+    border-color: ;
+    background-color: #ffffff;
+    color: #000000;
+}
+/* Hero Image Style end */
+
+
+
+/* Navigation bar style start */
+.navigation_bar{
+    background-color: var(--dark-teal);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 12px;
+    margin-left: 0;
+    border-bottom: 5px solid white;
+    height: 60px;
+} 
+.navigation_links a{
+    margin-right: 5px;
+    padding: 20px 20px;
+    border-radius: 2px;
+    color: #FFFFFF;
+    font-weight: bold;
+    text-decoration: none;
+    height: 100%;
+    transition: var(--transition-time);
+}
+.navigation_links a:hover{
+    background-color: var(--dark-emerald);
+}
+.player_tag{
+    display: inline-block;
+    vertical-align: middle;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+.player_tag a{
+    color: white;
+    text-decoration: none;
+    transition: var(--transition-time);
+}
+.player_tag a:hover{
+    text-decoration: underline;
+    color: wheat;
+}
+.signlog a {
+    margin-right: 0px;
+    margin-left: 9px;
+    background-color: var(--moss-green);
+    color:#FFFFFF;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: var(--transition-time);
+}
+.signlog a:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
+.signlog, .settings_button {
+    display: inline-block;
+    vertical-align: middle;
+}
+.settings_button img {
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    padding: 4px;
+    background-color: white;
+    border-radius: 100%;
+    cursor: pointer;
+    margin-left: 9px;
+}
+/* Navigation bar style end */
+
+
+
+/* Login and Signup Page style start */
+.login_signup_form{
+    background-color: white;
+    padding-bottom: 10px;
+    width: 90%;
+    max-width: 450px;
+    margin: 10% auto;
+    border: 2px solid black;
+    border-radius: 5px;
+}
+.login_signup_title{
+    text-align: left;
+    margin-left: 17%;
+    font-weight: bold;
+    color: black;
+}
+.username_and_password_bar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.username_and_password_bar input{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 2px;
+    height: 35px;
+    width: 65%;
+}
+.forgot_password{
+    margin-left: 17%;
+}
+.forgot_password a{
+    color: grey;
+}
+.forgot_password a:hover{
+    transition: var(--transition-time);
+    color: var(--medium-jungle);
+}
+
+.login_signup_submit_button{
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    margin-top: 8%;
+
+}
+.login_signup_submit_button input{
+    display: flex;
+    justify-content: center;
+    background-color: var(--moss-green);
+    border: 2px solid grey;
+    border-radius: 50px;
+    color: white;
+    padding: 10px 20px; 
+    width: auto;
+    text-align: center;
+    transition: var(--transition-time);
+}
+.login_signup_submit_button input:hover{
+    color: black;
+    background-color: white;
+    cursor: pointer;
+}
+.no_account_link{
+    display: flex;
+    justify-content: center;
+
+}
+.no_account_link a{
+    display: flex;
+    justify-content: center;
+    padding: 15px; 
+    color: grey;
+    transition: var(--transition-time);
+}
+.no_account_link a:hover{
+    color: var(--medium-jungle);
+}
+
+/* Login and Signup Page style end */
+
+
+
+/* Footer Style start */
+footer{
+    background-color: #000000;
+    border-top: 5px solid white;
+    border-bottom: 5px solid white;
+    text-align: center;
+    color: white;
+    width: 100%;
+    position: fixed;
+    bottom: 0; 
+
+}
+/* Footer Style end */
+

@@ -1,0 +1,30 @@
+{% extends "layout.html" %} 
+{% block content %}
+
+<div class="hero_image">
+    <h1 class="hero_title">
+            Lost Property Problems?
+    </h1>
+    <p class="hero_text">
+        Organise your Lost Property System Today!
+    </p>
+    <div class="signup_hero_button">
+            <a href="signup">Signup</a>
+    </div>
+</div>
+
+<!-- Flash messages start -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class=flashes>
+    {% for message in messages %}
+        <div>
+        {{ message }}
+        </div>
+    {% endfor %}
+    </div>
+{% endif %}
+{% endwith %}
+<!-- Flash messages end -->
+
+{% endblock %}

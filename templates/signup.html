@@ -1,0 +1,50 @@
+{% extends "layout.html" %} 
+{% block content %}
+
+<div class="login_signup_form">
+    <h1 class="title">
+        Signup
+    </h1>
+    <form method="post" action="/login">
+        <div>
+            <div>
+                <div class="login_signup_title">Username:</div>
+            </div>
+            <div class="username_and_password_bar">
+                <input type="text" name="username" required>
+            </div>
+            <div class="space"><div></div></div>
+            <div>
+                <div class="login_signup_title">Password:</div>
+            </div>
+            <div class="username_and_password_bar">
+                    <input type="password" name="password" required>
+            </div>
+            <div class="login_signup_submit_button">
+                <div>
+                    <input type="submit" value="Login">
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="no_account_link">
+        <a href="/login">Already have an account? Click here to log in</a>
+    </div>
+</div>
+
+
+
+<!-- Flash messages start -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class=flashes>
+      {% for message in messages %}
+        <div>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% endblock %}
