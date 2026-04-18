@@ -26,6 +26,7 @@ db = SQLAlchemy(app)
 
 # tables
 class User(db.Model):
+    __tablename__ = 'user'
     user_id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
@@ -35,14 +36,29 @@ class User(db.Model):
 
 
 class LostItem(db.Model):
+    __tablename__ = 'lost_item'
     item_id = db.Column(db.Integer, primary_key=True)
-    finder_id = db.Column(db.Integer, db.ForeignKey('User.user_id'))
-    type = db.Column(db.String(50))
+    finder_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    item_type = db.Column(db.String(50))
     time_found = db.Column(db.String(50))
     size = db.Column(db.String(50))
     nametag = db.Column(db.String(50))
     status = db.Column(db.String(50))
     notes = db.Column(db.String(50))
+    found_items = db.relationship('Colour', secondary='lostitem_colour', backref='finder')
+
+
+class Colour(db.Model):
+    __tablename__ = 'colour'
+    colour_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+
+
+lostitem_colour = db.Table(
+    'lostitem_colour', 
+    db.Column('iid', db.Integer, db.ForeignKey('lost_item.item_id')),
+    db.Column('cid', db.Integer, db.ForeignKey('colour.colour_id'))
+)
 
 
 
