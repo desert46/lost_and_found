@@ -1,4 +1,21 @@
 {% extends "layout.html" %} 
 {% block content %}
 
+<h1 class="title">Find</h1>
+<form method="post" action="/login">
+        <div>
+            <div>
+                <div class="login_signup_title">Search by name</div>
+            </div>
+            <div class="username_and_password_bar">
+                <input type="text" name="username" required>
+            </div>
+            <div class="login_signup_submit_button">
+                <div>
+                    <input type="submit" value="Search">
+                </div>
+            </div>
+        </div>
+    </form>
+
 {% endblock %}
