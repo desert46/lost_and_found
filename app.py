@@ -88,6 +88,8 @@ def create():
 # Login Stuff
 login_manager = LoginManager()
 login_manager.init_app(app)
+# redirects users to login page if they need to login to access a page
+login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -163,13 +165,13 @@ def signup():
     This is the route that leads to the signup page. This page allows the
     user to sign up using a username and password
     '''
-
     if request.method == 'POST':
         print('form done')
-        first_name = request.form.get('username').rstrip()
-        last_name = request.form.get('username').rstrip()
-        school_code = request.form.get('school_code').rstrip()
-        password = request.form.get('password').rstrip()
+        first_name = request.form.get('first_name').strip()
+        print(first_name)
+        last_name = request.form.get('last_name').strip()
+        school_code = request.form.get('school_code').strip()
+        password = request.form.get('password').strip()
         print('password')
         # Checking there is no blank inputs
         if first_name is None or last_name is None or password is None:
@@ -182,6 +184,7 @@ def signup():
         add = User(first_name=first_name, last_name=last_name, password=password, school_code=school_code)
         db.session.add(add)
         db.session.commit()
+        flash('Account created succesfully')
         
     print('route')    
     return render_template('signup.html',
