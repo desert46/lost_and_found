@@ -22,6 +22,9 @@ body{
     --soft-fawn: #ddb771ff;
     --transition-time: 0.4s;
 }
+.flashes {
+    color: red;
+}
 /* Colours end */
 
 

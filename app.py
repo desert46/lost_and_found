@@ -1,16 +1,22 @@
 '''Docstring'''
 
 # imports
-from flask import Flask, render_template, request, flash, session, redirect
+from flask import Flask, render_template, request, flash, session, redirect, url_for
 from flask_session import Session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import hashlib
 import sqlite3
 
 
 # Constants
 DATABASE = 'lost_and_found.db'
+SENDER_EMAIL = 'test'
+SENDER_EMAIL_PASSWORD = 'test'
 # flask session stuff
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -166,29 +172,85 @@ def signup():
     user to sign up using a username and password
     '''
     if request.method == 'POST':
-        print('form done')
         first_name = request.form.get('first_name').strip()
-        print(first_name)
         last_name = request.form.get('last_name').strip()
         school_code = request.form.get('school_code').strip()
         password = request.form.get('password').strip()
-        print('password')
+
+        # Checking that inputs are all valid
         # Checking there is no blank inputs
-        if first_name is None or last_name is None or password is None:
+        if first_name is None or last_name is None or school_code is None or password is None:
             flash('Provide valid input')
-            return render_template("signup.html",
-                                   title="Sign Up")
+            return redirect('/signup')
+        # Checking length of names
+        if len(first_name) <= 1 or len(last_name) <= 1:
+            flash('Please provide a valid name')
+            return redirect('/signup')
+        # Checking there are no numbers in the names
+        for letter in first_name:
+            if letter.isnumeric():
+                flash('Please provide a valid name length')
+                return redirect('/signup')
+        for letter in last_name:
+            if letter.isnumeric():
+                flash('Please provide a valid name length')
+                return redirect('/signup')
+        # Checking password length
+        if len(password) < 6 or len(password) > 20:
+            flash('Please provide a valid password length')
+            return redirect('/signup')
+        elif password.isalpha():
+            flash("Your password must have a number or special character")
+            return render_template("signup.html", title="Sign up")
         
-        # Succesful account creation
-        print('success')
-        add = User(first_name=first_name, last_name=last_name, password=password, school_code=school_code)
-        db.session.add(add)
-        db.session.commit()
-        flash('Account created succesfully')
-        
-    print('route')    
-    return render_template('signup.html',
-                           title='Signup',)
+        # storing the variables in the session to be used in the confirm route
+        session['first_name'] = first_name
+        session['last_name'] = last_name
+        session['school_code'] = school_code
+        session['password'] = password
+        session['correct_number'] = 123456
+
+        flash('enter the confirmation number')
+        return redirect(url_for('confirm'))
+    return render_template('signup.html', title='Sign Up')
+
+@app.route('/confirm', methods=['POST', 'GET'])
+def confirm():
+    '''Confirmation email'''
+    print('confirm route')
+    # getting variables from the session
+    first_name = session.get('first_name')
+    last_name = session.get('last_name')
+    school_code = session.get('school_code')
+    password = session.get('password')
+    correct_number = session.get('correct_number')
+
+    # prevents users from accessing the route if they are not making an account
+    if school_code is None or correct_number is None:
+        return render_template('404.html', title='Not allowed')
+
+    print(school_code)
+    print(correct_number)
+    if request.method == 'POST':
+        confirmation_number = request.form.get('confirmation_number').strip()
+        print(confirmation_number)
+        confirmation_number = int(confirmation_number)
+        if confirmation_number == correct_number:
+            # Successful account creation
+            print('success')
+            add = User(first_name=first_name, last_name=last_name, password=password, school_code=school_code)
+            db.session.add(add)
+            db.session.commit()
+            flash('Account created successfully')
+            session.clear()  # clears the variables
+            return redirect('/login')
+        else:
+            flash('wrong confirmation number')
+            return redirect('/login')
+
+    return render_template('confirm.html',
+                           title='Confirm',)
+
 
 
 # error handlers

@@ -1,0 +1,20 @@
+<form method='post' action="">
+    <div>
+        <input type="number" name="confirmation_number" required>
+    </div>
+    <div>
+        <input type="submit" value="submit">
+    </div>
+</form>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class=flashes style="text-align: center; padding-top: 5px;">
+        {% for message in messages %}
+            <div>
+            {{ message }}
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

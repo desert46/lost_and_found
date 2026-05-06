@@ -31,8 +31,21 @@
                 <div class="login_signup_title">Password:</div>
             </div>
             <div class="username_and_password_bar">
-                    <input type="password" name="password" required>
+                <input type="password" name="password" placeholder="6-20 in length and a special character/number" required>
             </div>
+
+            <!-- Flash messages start -->
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class=flashes style="text-align: center; padding-top: 5px;">
+                {% for message in messages %}
+                    <div>
+                    {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
             <div class="login_signup_submit_button">
                 <div>
                     <input type="submit" value="Create Account">
@@ -44,20 +57,5 @@
         <a href="/login">Already have an account? Click here to log in</a>
     </div>
 </div>
-
-
-
-<!-- Flash messages start -->
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div class=flashes>
-      {% for message in messages %}
-        <div>
-          {{ message }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
 
 {% endblock %}
