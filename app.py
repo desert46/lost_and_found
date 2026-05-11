@@ -11,12 +11,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import hashlib
 import sqlite3
+import auth
 
 
 # Constants
 DATABASE = 'lost_and_found.db'
-SENDER_EMAIL = 'test'
-SENDER_EMAIL_PASSWORD = 'test'
 # flask session stuff
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -203,16 +202,41 @@ def signup():
             flash("Your password must have a number or special character")
             return render_template("signup.html", title="Sign up")
         
+        # Initilising variables for the senders email
+
+        sender_email = auth.sender_email
+        sender_email_password = auth.sender_email_password
+
         # storing the variables in the session to be used in the confirm route
         session['first_name'] = first_name
         session['last_name'] = last_name
         session['school_code'] = school_code
         session['password'] = password
+        # generating random 6 digit confirmation code
         session['correct_number'] = 123456
+
+        # generating email with random confirmation code
+        message = MIMEMultipart()
+        message['From'] = '22177@burnside.school.nz'
+        message['To'] = f'{school_code}@burnside.school.nz'
+        print(f'{school_code}@burnside.school.nz')
+        message['Subject'] = 'Test email'
+        body = 'Here is your confirmation code: 123456'
+
+        message.attach(MIMEText(body, 'plain'))
+
+        # setting up gmail server
+        with smtplib.SMTP('smtp.gmail.com', 586) as server:
+            server.starttls()  # starting server
+            server.login(sender_email, sender_email_password)
+            server.send_message(message)
+            print('email send')
+
 
         flash('enter the confirmation number')
         return redirect(url_for('confirm'))
     return render_template('signup.html', title='Sign Up')
+
 
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm():
