@@ -72,6 +72,7 @@ lostitem_colour = db.Table(
 
 @app.route('/test')
 def test():
+    session.clear()
     results = User.query.all()
     return render_template('test.html', title='test', example=results,)
 
@@ -222,11 +223,10 @@ def signup():
         print(f'{school_code}@burnside.school.nz')
         message['Subject'] = 'Test email'
         body = 'Here is your confirmation code: 123456'
-
         message.attach(MIMEText(body, 'plain'))
 
-        # setting up gmail server
-        with smtplib.SMTP('smtp.gmail.com', 586) as server:
+        # setting up gmail server, will close as soon as email is sent
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()  # starting server
             server.login(sender_email, sender_email_password)
             server.send_message(message)
@@ -234,24 +234,25 @@ def signup():
 
 
         flash('enter the confirmation number')
-        return redirect(url_for('confirm'))
+        return redirect('/confirm')
     return render_template('signup.html', title='Sign Up')
 
 
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm():
     '''Confirmation email'''
-    print('confirm route')
+
+    # prevents users from accessing the route if they are not making an account
+    if school_code is None or correct_number is None:
+        return render_template('404.html', title='Not allowed')
+    
     # getting variables from the session
+    print('confirm route')
     first_name = session.get('first_name')
     last_name = session.get('last_name')
     school_code = session.get('school_code')
     password = session.get('password')
     correct_number = session.get('correct_number')
-
-    # prevents users from accessing the route if they are not making an account
-    if school_code is None or correct_number is None:
-        return render_template('404.html', title='Not allowed')
 
     print(school_code)
     print(correct_number)
