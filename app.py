@@ -9,6 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import random
 import hashlib
 import sqlite3
 import auth
@@ -204,7 +205,6 @@ def signup():
             return render_template("signup.html", title="Sign up")
         
         # Initilising variables for the senders email
-
         sender_email = auth.sender_email
         sender_email_password = auth.sender_email_password
 
@@ -214,15 +214,16 @@ def signup():
         session['school_code'] = school_code
         session['password'] = password
         # generating random 6 digit confirmation code
-        session['correct_number'] = 123456
+        correct_number = random.randint(100000, 999999)
+        session['correct_number'] = correct_number
 
         # generating email with random confirmation code
         message = MIMEMultipart()
-        message['From'] = '22177@burnside.school.nz'
+        message['From'] = auth.sender_email
         message['To'] = f'{school_code}@burnside.school.nz'
         print(f'{school_code}@burnside.school.nz')
         message['Subject'] = 'Test email'
-        body = 'Here is your confirmation code: 123456'
+        body = f'Here is your confirmation code: {correct_number}'
         message.attach(MIMEText(body, 'plain'))
 
         # setting up gmail server, will close as soon as email is sent
@@ -230,10 +231,10 @@ def signup():
             server.starttls()  # starting server
             server.login(sender_email, sender_email_password)
             server.send_message(message)
-            print('email send')
+            print('Email sent successfully')
 
 
-        flash('enter the confirmation number')
+        flash('Enter the confirmation number')
         return redirect('/confirm')
     return render_template('signup.html', title='Sign Up')
 
@@ -241,10 +242,6 @@ def signup():
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm():
     '''Confirmation email'''
-
-    # prevents users from accessing the route if they are not making an account
-    if school_code is None or correct_number is None:
-        return render_template('404.html', title='Not allowed')
     
     # getting variables from the session
     print('confirm route')
@@ -254,24 +251,26 @@ def confirm():
     password = session.get('password')
     correct_number = session.get('correct_number')
 
-    print(school_code)
-    print(correct_number)
+    # prevents users from accessing the route if they are not making an account
+    if school_code is None or correct_number is None:
+        return render_template('404.html', title='Not allowed')
+
     if request.method == 'POST':
         confirmation_number = request.form.get('confirmation_number').strip()
         print(confirmation_number)
         confirmation_number = int(confirmation_number)
         if confirmation_number == correct_number:
             # Successful account creation
-            print('success')
             add = User(first_name=first_name, last_name=last_name, password=password, school_code=school_code)
             db.session.add(add)
             db.session.commit()
+            print('Account created successfully')
             flash('Account created successfully')
             session.clear()  # clears the variables
             return redirect('/login')
         else:
-            flash('wrong confirmation number')
-            return redirect('/login')
+            flash('Wrong confirmation number')
+            return redirect('/confirm')
 
     return render_template('confirm.html',
                            title='Confirm',)
