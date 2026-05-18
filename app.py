@@ -1,11 +1,10 @@
 '''Docstring'''
 
 # imports
-from flask import Flask, render_template, request, flash, session, redirect, url_for
+from flask import Flask, render_template, request, flash, session, redirect
 from flask_session import Session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -170,7 +169,10 @@ def login():
 def signup():
     '''
     This is the route that leads to the signup page. This page allows the
-    user to sign up using a username and password
+    user to sign up using a name, school code, and password.
+    Assuming that the input requirements are met the user will be
+    redirected to a page to enter a confirmation number that has been emailed to them.
+    Only then will the account be successfully created.
     '''
     if request.method == 'POST':
         first_name = request.form.get('first_name').strip()
@@ -222,8 +224,8 @@ def signup():
         message['From'] = auth.sender_email
         message['To'] = f'{school_code}@burnside.school.nz'
         print(f'{school_code}@burnside.school.nz')
-        message['Subject'] = 'Test email'
-        body = f'Here is your confirmation code: {correct_number}'
+        message['Subject'] = 'Lost and Found BHS confirmation code'
+        body = f'Kia ora,\nHere is your confirmation code: {correct_number}'
         message.attach(MIMEText(body, 'plain'))
 
         # setting up gmail server, will close as soon as email is sent
@@ -231,7 +233,7 @@ def signup():
             server.starttls()  # starting server
             server.login(sender_email, sender_email_password)
             server.send_message(message)
-            print('Email sent successfully')
+            print(f'Email sent successfully to {school_code}@burnside.school.nz')
 
 
         flash('Enter the confirmation number')
@@ -264,7 +266,7 @@ def confirm():
             add = User(first_name=first_name, last_name=last_name, password=password, school_code=school_code)
             db.session.add(add)
             db.session.commit()
-            print('Account created successfully')
+            print(f'Account created successfully for {school_code}')
             flash('Account created successfully')
             session.clear()  # clears the variables
             return redirect('/login')
@@ -283,7 +285,10 @@ def page_not_found(e):
     '''
     Custom 404 page not found page
     '''
-    return render_template("404.html", title="Page Not Found"), 404
+    return render_template("error.html",
+                           title="Page Not Found",
+                           error_title="Oops, you must be lost",
+                           error_message="404 page not found"), 404
 
 
 if __name__ == "__main__":

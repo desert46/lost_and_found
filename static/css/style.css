@@ -230,7 +230,7 @@ body{
 
 
 /* Footer Style start */
-footer{
+footer {
     background-color: #000000;
     border-top: 5px solid white;
     border-bottom: 5px solid white;
@@ -242,4 +242,13 @@ footer{
 
 }
 /* Footer Style end */
+
+/* Error page style start */
+.error_title{
+    text-align: center;
+}
+.error_message{
+    text-align: center;
+}
+/* Error page style end */
 
