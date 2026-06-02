@@ -1,10 +1,11 @@
-'''Docstring'''
+'''This is a prject start during () and ended (). it focuses on the lost proptery system at'''
 
 # imports
 from flask import Flask, render_template, request, flash, session, redirect
 from flask_session import Session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
+# email stuff
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -74,6 +75,8 @@ lostitem_colour = db.Table(
 def test():
     session.clear()
     results = User.query.all()
+    print(current_user)
+    flash(current_user)
     return render_template('test.html', title='test', example=results,)
 
 
@@ -82,7 +85,7 @@ def add():
     add = User(first_name='Alex', last_name='Yao', password='heheheha', school_code='22177')
     db.session.add(add)
     db.session.commit()
-    return 'added data'
+    return 'added data successfully'
 
 
 @app.route('/create')
@@ -107,7 +110,6 @@ def load_user(user_id):
 def inject_variables():
     '''This function injects these variable into every route'''
     return dict(show_footer=True)
-
 
 # ensures that /, /index, and /home all lead to the same home page
 @app.route('/')
@@ -156,13 +158,33 @@ def about():
                            title='About',)
 
 
+@app.route('/dashboard', methods=['POST', 'GET'])
+def dashboard():
+    return render_template('dashboard.html', title='Dashboard')
+
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    '''
-    Docstring for login
-    '''
-    return render_template('login.html',
-                           title='Login',)
+    if request.method == 'POST':
+        school_code = request.form.get('school_code')
+        password = request.form.get('password')
+        if school_code is None or password is None:
+            flash('Please provide valid input')
+            return redirect('/login')
+        account = User.query.filter_by(school_code=school_code).first()
+        if account is None:
+            flash('School code is incorrect')
+            return redirect('/login')
+        if account.password == password:
+            print('Successful login')
+            user = User(school_code)
+            login_user(account)
+            flash('/Successful login, welcome')
+            return redirect('/dashboard')
+        else:
+            flash('Incorrect password, please try again')
+            return redirect('/login')
+    return render_template('login.html', title='Log in')
 
 
 @app.route('/signup', methods=['POST', 'GET'])
@@ -206,6 +228,9 @@ def signup():
             flash("Your password must have a number or special character")
             return render_template("signup.html", title="Sign up")
         
+        # Checking that this account doesn't already exist
+        
+
         # Initilising variables for the senders email
         sender_email = auth.sender_email
         sender_email_password = auth.sender_email_password
@@ -220,7 +245,7 @@ def signup():
         session['correct_number'] = correct_number
 
         # generating email with random confirmation code
-        message = MIMEMultipart()
+        message = MIMEMultipart()  # setting up email format
         message['From'] = auth.sender_email
         message['To'] = f'{school_code}@burnside.school.nz'
         print(f'{school_code}@burnside.school.nz')
@@ -241,6 +266,15 @@ def signup():
     return render_template('signup.html', title='Sign Up')
 
 
+@app.route('/logout')
+def logout():
+    '''This route logs out the user and redirects them to the home page'''
+    logout_user()
+    session.clear()
+    print('User succseffully logged out')
+    return redirect('/index')
+
+
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm():
     '''Confirmation email'''
@@ -255,7 +289,9 @@ def confirm():
 
     # prevents users from accessing the route if they are not making an account
     if school_code is None or correct_number is None:
-        return render_template('404.html', title='Not allowed')
+        return render_template('error.html', title='Not allowed',
+                               error_title="Oops, you must be lost",
+                               error_message="404 page not found")
 
     if request.method == 'POST':
         confirmation_number = request.form.get('confirmation_number').strip()
@@ -276,7 +312,6 @@ def confirm():
 
     return render_template('confirm.html',
                            title='Confirm',)
-
 
 
 # error handlers
