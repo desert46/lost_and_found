@@ -41,6 +41,9 @@ class User(db.Model, UserMixin):
     school_code = db.Column(db.String(20), nullable=False, unique=True)
     clearance = db.Column(db.Integer, default=4)
 
+    def get_id(self):
+        return str(self.user_id)
+
 
 class LostItem(db.Model):
     '''Database table containing the lost item information'''
@@ -177,7 +180,6 @@ def login():
             return redirect('/login')
         if account.password == password:
             print('Successful login')
-            user = User(school_code)
             login_user(account)
             flash('/Successful login, welcome')
             return redirect('/dashboard')
