@@ -265,7 +265,11 @@ def signup():
 
         
         # Checking that this account doesn't already exist
-        
+        existing_users = User.query.filter_by(school_code=school_code).first()
+        print(existing_users)
+        if existing_users is not None:
+            flash('This account already exists')
+            return redirect('/signup')
 
         # Initilising variables for the senders email
         sender_email = auth.sender_email
@@ -344,10 +348,15 @@ def confirm():
             print(f'Account created successfully for {school_code}')
             flash('Account created successfully')
             session.clear()  # clears the variables
-            return redirect('/login')
+            # Logging in user after successful account creation
+            account = User.query.filter_by(school_code=school_code).first()
+            login_user(account)
+            return redirect('/dashboard')
         else:
             flash('Wrong confirmation number')
             return redirect('/confirm')
+        
+
 
     return render_template('confirm.html',
                            title='Confirm',)
