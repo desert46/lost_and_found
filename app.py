@@ -76,10 +76,13 @@ lostitem_colour = db.Table(
 
 @app.route('/test')
 def test():
-    session.clear()
     results = User.query.all()
     print(current_user)
-    flash(current_user)
+    for i in results:
+        print(i.first_name)
+
+    print('test')
+    print(current_user.is_authenticated)
     return render_template('test.html', title='test', example=results,)
 
 
@@ -120,12 +123,17 @@ def inject_variables():
 @app.route('/home')
 def home():
     '''Flask route for the home page'''
+    # prevent logged in users from accessing the page
+    if current_user.is_authenticated:
+        return redirect('/dashboard')
+    
     return render_template('index.html',
                            title = 'Home',
                            )
 
 
 @app.route('/search', methods=['POST', 'GET'])
+@login_required
 def search():
     '''
     Docstring for search
@@ -135,6 +143,7 @@ def search():
 
 
 @app.route('/upload', methods=['POST', 'GET'])
+@login_required
 def upload():
     '''
     Docstring for upload
@@ -144,6 +153,7 @@ def upload():
 
 
 @app.route('/find', methods=['POST', 'GET'])
+@login_required
 def find():
     '''
     Docstring for find
@@ -162,12 +172,19 @@ def about():
 
 
 @app.route('/dashboard', methods=['POST', 'GET'])
+@login_required
 def dashboard():
+    print(current_user.is_authenticated)
     return render_template('dashboard.html', title='Dashboard')
 
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    '''Docstring for login'''
+    # prevent logged in users from accessing the page
+    if current_user.is_authenticated:
+            return redirect('/dashboard')
+    
     if request.method == 'POST':
         school_code = request.form.get('school_code')
         password = request.form.get('password')
@@ -181,11 +198,12 @@ def login():
         if account.password == password:
             print('Successful login')
             login_user(account)
-            flash('/Successful login, welcome')
+            flash('Successful login, welcome')
             return redirect('/dashboard')
         else:
             flash('Incorrect password, please try again')
             return redirect('/login')
+    
     return render_template('login.html', title='Log in')
 
 
@@ -198,6 +216,10 @@ def signup():
     redirected to a page to enter a confirmation number that has been emailed to them.
     Only then will the account be successfully created.
     '''
+    # prevent logged in users from accessing the page
+    if current_user.is_authenticated:
+            return redirect('/dashboard')
+    
     if request.method == 'POST':
         first_name = request.form.get('first_name').strip()
         last_name = request.form.get('last_name').strip()
@@ -222,13 +244,25 @@ def signup():
             if letter.isnumeric():
                 flash('Please provide a valid name length')
                 return redirect('/signup')
-        # Checking password length
-        if len(password) < 6 or len(password) > 20:
+        # Checking school code is valid
+        if school_code is None:
+            flash('Please provide a valid school code')
+            return redirect('/signup')
+        elif len(school_code) < 2:
+            flash('Please provide a valid school code')
+            return redirect('/signup')    
+        # Checking password
+        if password is None:
+            flash('Please provide a valid school code')
+            return redirect('/signup')
+        elif len(password) < 6 or len(password) > 20:
             flash('Please provide a valid password length')
             return redirect('/signup')
         elif password.isalpha():
             flash("Your password must have a number or special character")
             return render_template("signup.html", title="Sign up")
+        
+
         
         # Checking that this account doesn't already exist
         
@@ -297,9 +331,12 @@ def confirm():
 
     if request.method == 'POST':
         confirmation_number = request.form.get('confirmation_number').strip()
+        if confirmation_number is None or confirmation_number == '':
+            flash('Please enter a valid confirmation number')
+            return redirect('/confirm')
         print(confirmation_number)
-        confirmation_number = int(confirmation_number)
-        if confirmation_number == correct_number:
+
+        if int(confirmation_number )== correct_number:
             # Successful account creation
             add = User(first_name=first_name, last_name=last_name, password=password, school_code=school_code)
             db.session.add(add)
