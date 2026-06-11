@@ -6,9 +6,19 @@
         <a href="/upload">Upload</a>
         <a href="/about">About</a>
     </div>
-
-    <div class="signlog">
-        <a href="/login">Log in</a>
-        <a href="/signup">Sign up</a>
+    {% if logged_in %}
+    <div class="navigation_buttons">
+        <div class="signlog">
+            <a href="logout">Log Out</a>
+        </div>
+        <a class="settings_button" href="settings">
+            <img src="/static/images/settings_button.png" alt="Settings">
+        </a>
     </div>
+    {% else %}
+    <div class="signlog">
+        <a href="/login">Login</a>
+        <a href="/signup">Signup</a>
+    </div>
+    {% endif %}
 </div>

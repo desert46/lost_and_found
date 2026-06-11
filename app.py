@@ -115,7 +115,8 @@ def load_user(user_id):
 @app.context_processor
 def inject_variables():
     '''This function injects these variable into every route'''
-    return dict(show_footer=True)
+    return dict(show_footer=True,
+                logged_in = current_user.is_authenticated)
 
 # ensures that /, /index, and /home all lead to the same home page
 @app.route('/')
@@ -169,6 +170,12 @@ def about():
     '''
     return render_template('about.html',
                            title='About',)
+
+
+@app.route('/settings', methods=['POST', 'GET'])
+@login_required
+def settings():
+    return render_template('settings.html', title='Settings')
 
 
 @app.route('/dashboard', methods=['POST', 'GET'])
