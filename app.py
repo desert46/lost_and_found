@@ -181,6 +181,7 @@ def settings():
 @app.route('/dashboard', methods=['POST', 'GET'])
 @login_required
 def dashboard():
+    '''Route for the dashboard containing information for logged in users'''
     print(current_user.is_authenticated)
     return render_template('dashboard.html', title='Dashboard')
 
