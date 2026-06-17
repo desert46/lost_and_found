@@ -83,6 +83,7 @@ def test():
 
     print('test')
     print(current_user.is_authenticated)
+    print(session['clearance'])
     return render_template('test.html', title='test', example=results,)
 
 
@@ -139,6 +140,12 @@ def search():
     '''
     Docstring for search
     '''
+    if session['clearance'] > 1:   # Clearance check
+        # Uers below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidon',
+                               error_title='Forbiddon',
+                               error_message='You do not have permission to access this page')
     return render_template('search.html',
                            title='Search',)
 
@@ -149,6 +156,12 @@ def upload():
     '''
     Docstring for upload
     '''
+    if session['clearance'] > 1:   # Clearance check
+        # Uers below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidon',
+                               error_title='Forbiddon',
+                               error_message='You do not have permission to access this page')
     return render_template('upload.html',
                            title='Upload',)
 
@@ -207,6 +220,8 @@ def login():
             print('Successful login')
             login_user(account)
             flash('Successful login, welcome')
+            session['clearance'] = account.clearance
+            print(session['clearance'])
             return redirect('/dashboard')
         else:
             flash('Incorrect password, please try again')
@@ -270,8 +285,6 @@ def signup():
             flash("Your password must have a number or special character")
             return render_template("signup.html", title="Sign up")
         
-
-        
         # Checking that this account doesn't already exist
         existing_users = User.query.filter_by(school_code=school_code).first()
         print(existing_users)
@@ -307,7 +320,6 @@ def signup():
             server.login(sender_email, sender_email_password)
             server.send_message(message)
             print(f'Email sent successfully to {school_code}@burnside.school.nz')
-
 
         flash('Enter the confirmation number')
         return redirect('/confirm')
@@ -359,6 +371,7 @@ def confirm():
             # Logging in user after successful account creation
             account = User.query.filter_by(school_code=school_code).first()
             login_user(account)
+            session['clearance'] = account.clearance
             return redirect('/dashboard')
         else:
             flash('Wrong confirmation number')
@@ -380,6 +393,8 @@ def page_not_found(e):
                            title="Page Not Found",
                            error_title="Oops, you must be lost",
                            error_message="404 page not found"), 404
+
+
 
 
 if __name__ == "__main__":
