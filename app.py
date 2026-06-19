@@ -231,7 +231,7 @@ def login():
 
 
 @app.route('/signup', methods=['POST', 'GET'])
-def signup():
+def signup(): 
     '''
     This is the route that leads to the signup page. This page allows the
     user to sign up using a name, school code, and password.
