@@ -56,7 +56,7 @@ class LostItem(db.Model):
     nametag = db.Column(db.String(50))
     status = db.Column(db.String(50))
     notes = db.Column(db.String(50))
-    found_items = db.relationship('Colour', secondary='lostitem_colour', backref='finder')
+    colours = db.relationship('Colour', secondary='lostitem_colour', backref='lost_items')
 
 
 class Colour(db.Model):
@@ -73,11 +73,11 @@ lostitem_colour = db.Table(
     db.Column('cid', db.Integer, db.ForeignKey('colour.colour_id'))
 )
 
-
+@login_required
 @app.route('/test')
 def test():
     results = User.query.all()
-    print(current_user)
+    print(current_user.school_code)
     for i in results:
         print(i.first_name)
 
@@ -162,6 +162,40 @@ def upload():
                                title='Access Forbidon',
                                error_title='Forbiddon',
                                error_message='You do not have permission to access this page')
+    
+    if request.method == 'POST':
+        finder_id = current_user.school_code
+        item_type = request.form.get('item_type')
+        item_colours = request.form.getlist('colours[]')
+        time_found = request.form.get('time_found')
+        size = request.form.get('size')
+        nametag = request.form.get('nametag')
+        status = 'Lost and Found'
+        notes = request.form.get('notes')
+
+        print(item_colours)
+
+        item = LostItem(finder_id=finder_id,
+                       item_type=item_type,
+                       time_found=time_found,
+                       size=size,
+                       nametag=nametag,
+                       status=status,
+                       notes=notes)
+        
+        for item_colour in item_colours:
+            colour = Colour.query.filter_by(name=item_colour).first()
+            if colour:
+                item.colours.append(colour)
+
+
+        db.session.add(item)
+        
+        
+        db.session.commit()
+        
+        print('added')
+        
     return render_template('upload.html',
                            title='Upload',)
 
