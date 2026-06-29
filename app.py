@@ -73,6 +73,7 @@ lostitem_colour = db.Table(
     db.Column('cid', db.Integer, db.ForeignKey('colour.colour_id'))
 )
 
+# testing routes
 @login_required
 @app.route('/test')
 def test():
@@ -101,7 +102,7 @@ def create():
     return 'donezo'
 
 
-# Login Stuff
+# Flask_Login Stuff
 login_manager = LoginManager()
 login_manager.init_app(app)
 # redirects users to login page if they need to login to access a page
@@ -115,7 +116,7 @@ def load_user(user_id):
 # routes
 @app.context_processor
 def inject_variables():
-    '''This function injects these variable into every route'''
+    '''This route injects these variable into every route'''
     return dict(show_footer=True,
                 logged_in = current_user.is_authenticated)
 
@@ -206,6 +207,34 @@ def find():
     '''
     Docstring for find
     '''
+
+    if request.method == 'POST':
+        finder_id = current_user.school_code
+        item_type = request.form.get('item_type')
+        item_colours = request.form.getlist('colours[]')
+        time_found = request.form.get('time_found')
+        size = request.form.get('size')
+        nametag = request.form.get('nametag')
+        status = 'Looking for'
+        notes = request.form.get('notes')
+
+        print(item_colours)
+
+        item = LostItem(finder_id=finder_id,
+                       item_type=item_type,
+                       time_found=time_found,
+                       size=size,
+                       nametag=nametag,
+                       status=status,
+                       notes=notes)
+        
+        for item_colour in item_colours:
+            colour = Colour.query.filter_by(name=item_colour).first()
+            if colour:
+                item.colours.append(colour)
+
+        db.session.add(item)
+        db.session.commit()
     return render_template('find.html',
                            title='Find',)
 
@@ -229,6 +258,7 @@ def settings():
 @login_required
 def dashboard():
     '''Route for the dashboard containing information for logged in users'''
+
     print(current_user.is_authenticated)
     return render_template('dashboard.html', title='Dashboard')
 
