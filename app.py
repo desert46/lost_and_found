@@ -263,6 +263,19 @@ def dashboard():
     return render_template('dashboard.html', title='Dashboard')
 
 
+@app.route('/admin', methods=['POST', 'GET'])
+@login_required
+def admin():
+    if session['clearance'] > 1:   # Clearance check
+        # Uers below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidon',
+                               error_title='Forbiddon',
+                               error_message='You do not have permission to access this page')
+    
+    return render_template('admin.html', title='Admin')
+
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     '''Docstring for login'''
