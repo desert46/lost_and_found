@@ -237,6 +237,39 @@ body{
 /* Login and Signup Page style end */
 
 
+/* Admin page style start */
+.sub_heading{
+    text-align: left;
+    color: white;
+    margin-left: 100px;
+}
+.item_info_table{
+    border-collapse: collapse;
+    width: 90%;
+
+    margin: 0 auto 100px auto;
+    text-align: left;
+    color: #FFFFFF;
+    border: 3px solid white;
+}
+.item_info_table th {
+    border: 3px solid white;
+    text-align: left;
+    padding: 8px;
+}
+.item_info_table td{
+    border: 3px solid white;
+    text-align: left;
+    padding: 8px;
+}
+.item_info_header{
+    background-color: #338800;
+}
+.item_info_row{
+    background-color: #6bbf59ff;
+}
+
+/* Admine page style end */
 
 /* Footer Style start */
 footer {

@@ -171,7 +171,7 @@ def upload():
         time_found = request.form.get('time_found')
         size = request.form.get('size')
         nametag = request.form.get('nametag')
-        status = 'Lost and Found'
+        status = 'LOST AND FOUND'
         notes = request.form.get('notes')
 
         print(item_colours)
@@ -215,7 +215,7 @@ def find():
         time_found = request.form.get('time_found')
         size = request.form.get('size')
         nametag = request.form.get('nametag')
-        status = 'Looking for'
+        status = 'LOOKING FOR'
         notes = request.form.get('notes')
 
         print(item_colours)
@@ -273,7 +273,12 @@ def admin():
                                error_title='Forbiddon',
                                error_message='You do not have permission to access this page')
     
-    return render_template('admin.html', title='Admin')
+    lost_and_found_items = LostItem.query.filter_by(status='LOST AND FOUND').all()
+    missing_items = LostItem.query.filter_by(status='LOOKING FOR').all()
+    
+    return render_template('admin.html', title='Admin',
+                           lost_and_found_items=lost_and_found_items,
+                           missing_items=missing_items)
 
 
 @app.route('/login', methods=['POST', 'GET'])
