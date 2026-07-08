@@ -9,7 +9,7 @@
   <h2 class="sub_heading">Lost and Found items</h2>
     <tr>
       <th class="item_info_header">Item ID</th>
-      <th class="item_info_header">Finder's School code</th>
+      <th class="item_info_header">Finder's code</th>
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
       <th class="item_info_header">Item size</th>
@@ -22,7 +22,14 @@
       <th>{{item.item_id}}</th>
       <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>
-      <td>{{item.time_found}}</td>
+      <!-- formatting date and time into a more readable format -->
+      <td>
+        {% if item.time_found is not none %}
+          ({{ item.time_found[11:16] }}) {{ item.time_found[8:10] }}/{{ item.time_found[5:7] }}/{{ item.time_found[0:4] }}
+        {% else %}
+          {{item.time_found}}
+        {% endif %}
+      </td>
       <td>{{item.size}}</td>
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
@@ -32,10 +39,10 @@
 </table>
 
 <table class="item_info_table">
-    <h2 class="sub_heading">Lost and Found items</h2>
+    <h2 class="sub_heading">Missing items</h2>
     <tr>
       <th class="item_info_header">Item ID</th>
-      <th class="item_info_header">Finder's School code</th>
+      <th class="item_info_header">Finder's code</th>
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
       <th class="item_info_header">Item size</th>
@@ -44,7 +51,7 @@
       <th class="item_info_header">Notes</th>
     </tr> 
     {% for item in missing_items %}
-    <tr>
+    <tr class="item_info_row">
       <th>{{item.item_id}}</th>
       <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>

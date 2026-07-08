@@ -168,11 +168,11 @@ def upload():
         finder_id = current_user.school_code
         item_type = request.form.get('item_type')
         item_colours = request.form.getlist('colours[]')
-        time_found = request.form.get('time_found')
-        size = request.form.get('size')
-        nametag = request.form.get('nametag')
+        time_found = request.form.get('time_found') or None
+        size = request.form.get('size') or None
+        nametag = request.form.get('nametag') or None
         status = 'LOST AND FOUND'
-        notes = request.form.get('notes')
+        notes = request.form.get('notes') or None
 
         print(item_colours)
 
@@ -212,29 +212,12 @@ def find():
         finder_id = current_user.school_code
         item_type = request.form.get('item_type')
         item_colours = request.form.getlist('colours[]')
-        time_found = request.form.get('time_found')
-        size = request.form.get('size')
-        nametag = request.form.get('nametag')
         status = 'LOOKING FOR'
-        notes = request.form.get('notes')
-
-        print(item_colours)
-
-        item = LostItem(finder_id=finder_id,
-                       item_type=item_type,
-                       time_found=time_found,
-                       size=size,
-                       nametag=nametag,
-                       status=status,
-                       notes=notes)
         
-        for item_colour in item_colours:
-            colour = Colour.query.filter_by(name=item_colour).first()
-            if colour:
-                item.colours.append(colour)
 
-        db.session.add(item)
-        db.session.commit()
+        return render_template('find.html',
+                               title='Find')
+
     return render_template('find.html',
                            title='Find',)
 
@@ -275,6 +258,9 @@ def admin():
     
     lost_and_found_items = LostItem.query.filter_by(status='LOST AND FOUND').all()
     missing_items = LostItem.query.filter_by(status='LOOKING FOR').all()
+
+    for item in lost_and_found_items:
+        print(item.time_found)
     
     return render_template('admin.html', title='Admin',
                            lost_and_found_items=lost_and_found_items,
