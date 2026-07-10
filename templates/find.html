@@ -2,10 +2,11 @@
 {% block content %}
 
 <h1 class="title">Find</h1>
+
 <form method="post" action="/find">
     <div class="upload_form">
         <h2 class="upload_form_subtitle">Item Type</h2>
-        <select name="item_type">
+        <select name="item_type" class="upload_type_dropdown">
             <option value="BHS Beanie">BHS Beanie</option>
             <option value="BHS Blazer">BHS Blazer</option>
             <option value="BHS Cardigan">BHS Cardigan</option>
@@ -117,24 +118,8 @@
                 <input type="checkbox" name="colours[]" value="Silver"> Silver
             </label>
         </fieldset>
-  
 
-
-        <h2 class="upload_form_subtitle">Time Lost</h2>
-        <input type="datetime-local" name="time_found">
-
-        <h2 class="upload_form_subtitle">Size</h2>
-        <input type="text" name="size">
-
-        <h2 class="upload_form_subtitle">Nametag</h2>
-        <p>Leave empty if none</p>
-        <input type="text" name="nametag">
-
-        <h2 class="upload_form_subtitle">Notes</h2>
-        <p>Please provide as many extra details as possible (e.g. location found, items in each pocket, significant markings etc.)</p>
-        <input type="text" name="notes">
-
-        <input type="submit" value="submit">
+        <input class='upload_submit_button' type="submit" value="submit">
     </div>
 
 </form>

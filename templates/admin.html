@@ -5,6 +5,126 @@
     Admin Panel
 </h1>
 
+<form method="post" action="/find">
+    <div class="upload_form">
+        <h2 class="upload_form_subtitle">Item Type</h2>
+        <select name="item_type" class="upload_type_dropdown">
+            <option value="BHS Beanie">BHS Beanie</option>
+            <option value="BHS Blazer">BHS Blazer</option>
+            <option value="BHS Cardigan">BHS Cardigan</option>
+            <option value="BHS Jacket">BHS Jacket</option>
+            <option value="BHS Lavalava">BHS Lavalava</option>
+            <option value="BHS Long-sleeved shirt">BHS Long-sleeved shirt</option>
+            <option value="BHS PE Shorts">BHS PE Shorts</option>
+            <option value="BHS PE Top">BHS PE Top</option>
+            <option value="BHS Scarf">BHS Scarf</option>
+            <option value="BHS Short-sleeved shirt">BHS Short-sleeved shirt</option>
+            <option value="BHS Shorts">BHS Shorts</option>
+            <option value="BHS Skirt">BHS Skirt</option>
+            <option value="BHS Sleveless vest">BHS Sleveless vest</option>
+            <option value="BHS Socks">BHS Socks</option>
+            <option value="BHS Tie">BHS Tie</option>
+            <option value="BHS Tights">BHS Tights</option>
+            <option value="BHS Tracksuit">BHS Tracksuit</option>
+            <option value="BHS Trousers">BHS Trousers</option>
+            <option value="BHS V-necked jersey">BHS V-necked jersey</option>
+            <option value="Blazer">Blazer</option>
+            <option value="Cap">Cap</option>
+            <option value="Cardigan">Cardigan</option>
+            <option value="Coat">Coat</option>
+            <option value="Dress">Dress</option>
+            <option value="Hair tie">Hair tie</option>
+            <option value="Hat">Hat</option>
+            <option value="Hoodie">Hoodie</option>
+            <option value="Jacket">Jacket</option>
+            <option value="Jandals">Jandals</option>
+            <option value="Jeans">Jeans</option>
+            <option value="Jersey">Jersey</option>
+            <option value="Long Skirt">Long Skirt</option>
+            <option value="Long-sleeved Shirt">Long-sleeved Shirt</option>
+            <option value="Pants">Pants</option>
+            <option value="Scarf">Scarf</option>
+            <option value="Shirt">Shirt</option>
+            <option value="Shorts">Shorts</option>
+            <option value="Skirt">Skirt</option>
+            <option value="Socks">Socks</option>
+            <option value="T-Shirt">T-Shirt</option>
+            <option value="Tank top">Tank top</option>
+            <option value="Tie">Tie</option>
+            <option value="Tights">Tights</option>
+        </select>
+
+        <h2 class="upload_form_subtitle">Colour</h2>
+        <fieldset>
+            <label>
+                <input type="checkbox" name="colours[]" value="BHS Uniform"> BHS Uniform
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Red"> Red
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Orange"> Orange
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Yellow"> Yellow
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Green"> Light Green
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Green"> Dark Green
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Blue"> Light Blue
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Blue"> Dark Blue
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Navy Blue"> Navy Blue
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Purple"> Light Purple
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Purple"> Dark Purple
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Pink"> Pink
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Brown/Tan"> Light Brown/Tan
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Brown"> Dark Brown
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="White"> White
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Grey"> Light Grey
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Grey"> Dark Grey
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Black"> Black
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Cream"> Cream
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Gold"> Gold
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Silver"> Silver
+            </label>
+        </fieldset>
+
+        <input class='upload_submit_button' type="submit" value="Filter">
+    </div>
+</form>
+
 <table class="item_info_table">
   <h2 class="sub_heading">Lost and Found items</h2>
     <tr>
@@ -16,6 +136,7 @@
       <th class="item_info_header">Nametag (If any)</th>
       <th class="item_info_header">Status</th>
       <th class="item_info_header">Notes</th>
+      <th class="item_info_header">Action</th>
     </tr> 
     {% for item in lost_and_found_items %}
     <tr class="item_info_row">
@@ -34,6 +155,7 @@
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
       <td>{{item.notes}}</td>
+      <td><button>Edit</button></td>
     </tr>
     {% endfor %}
 </table>
@@ -49,6 +171,7 @@
       <th class="item_info_header">Nametag (If any)</th>
       <th class="item_info_header">Status</th>
       <th class="item_info_header">Notes</th>
+      <th class="item_info_header">Action</th>
     </tr> 
     {% for item in missing_items %}
     <tr class="item_info_row">
@@ -60,6 +183,7 @@
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
       <td>{{item.notes}}</td>
+      <td>test</td>
     </tr>
     {% endfor %}
 </table>

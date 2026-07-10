@@ -5,8 +5,8 @@
 
 <form method="post" action="/upload">
     <div class="upload_form">
-        <h2 class="upload_form_subtitle">Item Type</h2>
-        <select name="item_type">
+        <h2 class="upload_form_subtitle">Item Type:</h2>
+        <select name="item_type" class="upload_type_dropdown">
             <option value="BHS Beanie">BHS Beanie</option>
             <option value="BHS Blazer">BHS Blazer</option>
             <option value="BHS Cardigan">BHS Cardigan</option>
@@ -52,8 +52,8 @@
             <option value="Tights">Tights</option>
         </select>
 
-        <h2 class="upload_form_subtitle">Colour</h2>
-        <fieldset>
+        <h2 class="upload_form_subtitle">Colour:</h2>
+        <fieldset class='upload_colour_selection'>
             <label>
                 <input type="checkbox" name="colours[]" value="BHS Uniform"> BHS Uniform
             </label>
@@ -121,21 +121,22 @@
   
 
 
-        <h2 class="upload_form_subtitle">Time found</h2>
-        <input type="datetime-local" name="time_found">
+        <h2 class="upload_form_subtitle">Time found:</h2>
+        <p> e.g. 06/07/2026, 01:50 PM</p>
+        <input class='upload_datetime' type="datetime-local" name="time_found">
 
-        <h2 class="upload_form_subtitle">Size</h2>
-        <input type="text" name="size" maxlength="10">
+        <h2 class="upload_form_subtitle">Size:</h2>
+        <input class='upload_text_box' type="text" name="size" maxlength="10">
 
-        <h2 class="upload_form_subtitle">Nametag</h2>
+        <h2 class="upload_form_subtitle">Nametag:</h2>
         <p>Leave empty if none</p>
         <input type="text" name="nametag">
 
-        <h2 class="upload_form_subtitle">Notes</h2>
+        <h2 class="upload_form_subtitle">Notes:</h2>
         <p>Please provide as many extra details as possible (e.g. location found, items in each pocket, significant markings etc.)</p>
-        <input type="text" name="notes">
+        <input class='upload_text_box' type="text" name="notes">
 
-        <input type="submit" value="submit">
+        <input class='upload_submit_button' type="submit" value="submit">
     </div>
 
 </form>

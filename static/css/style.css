@@ -1,5 +1,3 @@
-
-
 body{
     background-color: var(--dark-emerald);
     font-family: "Roboto", sans-serif;
@@ -67,8 +65,6 @@ body{
     color: #000000;
 }
 /* Hero Image Style end */
-
-
 
 /* Navigation bar style start */
 .navigation_bar{
@@ -148,92 +144,86 @@ body{
 }
 /* Navigation bar style end */
 
-
-
 /* Login and Signup Page style start */
 .login_signup_form{
-    background-color: white;
-    padding-bottom: 10px;
-    width: 90%;
-    max-width: 450px;
-    margin: auto;
-    margin-top: 5%;
-    margin-bottom: 0;
+    background-color: #ffffff;
+    max-width: 480px;
+    margin: 2.5rem auto;
+    padding: 1.75rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
     border: 2px solid black;
-    border-radius: 5px;
+    color: black;
+    box-sizing: border-box;
 }
 .login_signup_title{
-    text-align: left;
-    margin-left: 17%;
-    margin-top: 2%;
-    font-weight: bold;
+    margin: 0 0 1rem 0;
+    font-size: 1.4rem;
+    font-weight: 700;
     color: black;
 }
 .username_and_password_bar{
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 .username_and_password_bar input{
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    border: 1px solid black;
-    border-radius: 2px;
-    height: 35px;
-    width: 65%;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d6dc;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    font-size: 0.96rem;
 }
 .forgot_password{
-    margin-left: 17%;
+    margin: 0.5rem 0 1rem 0;
+    font-style: underline;
 }
 .forgot_password a{
-    color: grey;
+    color: #4b5563;
+    text-decoration: none;
+    transition: var(--transition-time);
 }
 .forgot_password a:hover{
-    transition: var(--transition-time);
     color: var(--medium-jungle);
 }
-
 .login_signup_submit_button{
     display: flex;
     justify-content: center;
-    padding: 0;
-    margin-top: 8%;
-
+    margin-top: 1rem;
 }
 .login_signup_submit_button input{
-    display: flex;
-    justify-content: center;
-    background-color: var(--moss-green);
-    border: 2px solid grey;
-    border-radius: 50px;
-    color: white;
-    padding: 10px 20px; 
-    width: auto;
-    text-align: center;
+    background-color: var(--medium-jungle);
+    color: #ffffff;
+    padding: 10px 26px;
+    border-radius: 999px;
+    border: none;
+    border: 2px solid white;
+    font-weight: 700;
+    cursor: pointer;
     transition: var(--transition-time);
 }
 .login_signup_submit_button input:hover{
-    color: black;
-    background-color: white;
-    cursor: pointer;
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid var(--medium-jungle);
 }
 .no_account_link{
     display: flex;
     justify-content: center;
-
+    margin-top: 0.75rem;
 }
 .no_account_link a{
-    display: flex;
-    justify-content: center;
-    padding: 15px; 
-    color: grey;
+    padding: 15px 0 0 0;
+    color: #4b5563;
+    text-decoration: none;
     transition: var(--transition-time);
 }
 .no_account_link a:hover{
     color: var(--medium-jungle);
 }
-
 /* Login and Signup Page style end */
 
 
@@ -268,8 +258,97 @@ body{
 .item_info_row{
     
 }
-
 /* Admin page style end */
+
+/* Upload page style start */
+.upload_form{
+    background-color: #ffffff;
+    max-width: 900px;
+    margin: 2.5rem auto;
+    padding: 1.75rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(2,6,23,0.12);
+    border: 2px solid black;
+    color: black;
+    box-sizing: border-box;
+}
+.upload_form h2.upload_form_subtitle{
+    margin: 0.5rem 0 0.35rem 0;
+    font-size: 1rem;
+    color: black;
+    font-weight: 700;
+}
+.upload_form p{
+    margin: 0 0 0.6rem 0;
+    color: #333333;
+
+}
+.upload_type_dropdown,
+.upload_datetime,
+.upload_text_box,
+.upload_form input[type="text"]{
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d6dc;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    font-size: 0.96rem;
+}
+.upload_type_dropdown{
+    appearance: none;
+}
+.upload_colour_selection{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border: none;
+    margin: 0 0 0.5rem 0;
+}
+.upload_colour_selection label{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #f7f9fb;
+    border: 1px solid #e3e8ee;
+    cursor: pointer;
+    font-size: 0.92rem;
+}
+.upload_colour_selection input[type="checkbox"]{
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--medium-jungle);
+}
+.upload_submit_button{
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+.upload_submit_button input{
+    background-color: var(--medium-jungle);
+    color: #ffffff;
+    padding: 10px 26px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-time);
+}
+.upload_submit_button input:hover{
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid var(--medium-jungle);
+}
+
+/* Small helper responsiveness */
+
+
+/* Upload page style end */
+
 
 /* Footer Style start */
 footer {

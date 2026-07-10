@@ -212,7 +212,12 @@ def find():
         finder_id = current_user.school_code
         item_type = request.form.get('item_type')
         item_colours = request.form.getlist('colours[]')
-        status = 'LOOKING FOR'
+
+        
+        
+        missing_items = LostItem.query.filter_by(finder_id=finder_id,
+                                                 item_type=item_type,
+                                                 status='LOST AND FOUND')
         
 
         return render_template('find.html',
