@@ -1,0 +1,41 @@
+{% extends "layout.html" %} 
+{% block content %}
+
+<h1 class="title">Item</h1>
+
+<table class="item_info_table">
+  <h2 class="sub_heading">Lost and Found items</h2>
+    <tr>
+      <th class="item_info_header">Item ID</th>
+      <th class="item_info_header">Finder's code</th>
+      <th class="item_info_header">Item type</th>
+      <th class="item_info_header">Time found</th>
+      <th class="item_info_header">Item size</th>
+      <th class="item_info_header">Nametag (If any)</th>
+      <th class="item_info_header">Status</th>
+      <th class="item_info_header">Notes</th>
+      <th class="item_info_header">Action</th>
+    </tr> 
+    {% for item in items %}
+    <tr class="item_info_row">
+      <th>{{item.item_id}}</th>
+      <td>{{item.finder_id}}</td>
+      <td>{{item.item_type}}</td>
+      <!-- formatting date and time into a more readable format -->
+      <td>
+        {% if item.time_found is not none %}
+          ({{ item.time_found[11:16] }}) {{ item.time_found[8:10] }}/{{ item.time_found[5:7] }}/{{ item.time_found[0:4] }}
+        {% else %}
+          {{item.time_found}}
+        {% endif %}
+      </td>
+      <td>{{item.size}}</td>
+      <td>{{item.nametag}}</td>
+      <td>{{item.status}}</td>
+      <td>{{item.notes}}</td>
+      <td class="edit_item_button"><a href="/item/{{item.item_id}}">Delete</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

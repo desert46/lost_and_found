@@ -272,6 +272,12 @@ def admin():
                            missing_items=missing_items)
 
 
+@app.route('/item/<int:item_id>')
+def item(item_id):
+    items = LostItem.query.filter_by(item_id=item_id)
+    return render_template('item.html', title='Edit Item', items=items)
+
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     '''Docstring for login'''
