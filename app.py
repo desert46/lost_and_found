@@ -11,7 +11,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import random
 import hashlib
-import sqlite3
 import auth
 
 
@@ -210,8 +209,8 @@ def find():
 
     if request.method == 'POST':
         finder_id = current_user.school_code
-        item_type = request.form.get('item_type')
-        item_colours = request.form.getlist('colours[]')
+        item_type = request.form.get('item_type') or None
+        
 
         
         
@@ -272,10 +271,42 @@ def admin():
                            missing_items=missing_items)
 
 
-@app.route('/item/<int:item_id>')
+@app.route('/item/<int:item_id>', methods=['GET', 'POST'])
 def item(item_id):
-    items = LostItem.query.filter_by(item_id=item_id)
-    return render_template('item.html', title='Edit Item', items=items)
+    item = LostItem.query.get_or_404(item_id)
+    items = [item]
+    # getting list of colours for preselecting colour options
+    colour_names = [colour.name for colour in item.colours]
+
+    if request.method == 'POST':
+        item.item_type = request.form.get('item_type')
+        item_colours = request.form.getlist('colours[]')
+        item.time_found = request.form.get('time_found') or None
+        item.size = request.form.get('size') or None
+        item.nametag = request.form.get('nametag') or None
+        item.status = request.form.get('item_status') or None
+        item.notes = request.form.get('notes') or None
+
+        item.colours.clear()
+        for item_colour in item_colours:
+            colour = Colour.query.filter_by(name=item_colour).first()
+            if colour:
+                item.colours.append(colour)
+
+        db.session.commit()
+        flash('Item updated successfully')
+        return redirect(f'/item/{item_id}')
+
+    return render_template('item.html', title='Edit Item', items=items, colour_names=colour_names)
+
+
+@app.route('/item/<int:item_id>/delete', methods=['POST'])
+def delete(item_id):
+    item = LostItem.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash('Item deleted successfully')
+    return redirect('/dashboard')
 
 
 @app.route('/login', methods=['POST', 'GET'])

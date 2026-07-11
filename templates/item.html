@@ -3,6 +3,7 @@
 
 <h1 class="title">Item</h1>
 
+{% for item in items %}
 <table class="item_info_table">
   <h2 class="sub_heading">Lost and Found items</h2>
     <tr>
@@ -16,7 +17,7 @@
       <th class="item_info_header">Notes</th>
       <th class="item_info_header">Action</th>
     </tr> 
-    {% for item in items %}
+    
     <tr class="item_info_row">
       <th>{{item.item_id}}</th>
       <td>{{item.finder_id}}</td>
@@ -33,9 +34,156 @@
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
       <td>{{item.notes}}</td>
-      <td class="edit_item_button"><a href="/item/{{item.item_id}}">Delete</a></td>
+      <td class="edit_item_button">
+        <form method="post" action="/item/{{item.item_id}}/delete" class="delete_button_form">
+          <button type="submit" class="upload_submit_button">Delete</button>
+        </form>
+      </td>
     </tr>
-    {% endfor %}
-</table>
 
+</table>
+<form method="post" action="/item/{{item.item_id}}">
+    <div class="upload_form">
+        <h2 class="upload_form_subtitle">Item Type:</h2>
+        <select name="item_type" class="upload_type_dropdown">
+            <option value="BHS Beanie" {% if item.item_type == 'BHS Beanie' %}selected{% endif %}>BHS Beanie</option>
+            <option value="BHS Blazer" {% if item.item_type == 'BHS Blazer' %}selected{% endif %}>BHS Blazer</option>
+            <option value="BHS Cardigan" {% if item.item_type == 'BHS Cardigan' %}selected{% endif %}>BHS Cardigan</option>
+            <option value="BHS Jacket" {% if item.item_type == 'BHS Jacket' %}selected{% endif %}>BHS Jacket</option>
+            <option value="BHS Lavalava" {% if item.item_type == 'BHS Lavalava' %}selected{% endif %}>BHS Lavalava</option>
+            <option value="BHS Long-sleeved shirt" {% if item.item_type == 'BHS Long-sleeved shirt' %}selected{% endif %}>BHS Long-sleeved shirt</option>
+            <option value="BHS PE Shorts" {% if item.item_type == 'BHS PE Shorts' %}selected{% endif %}>BHS PE Shorts</option>
+            <option value="BHS PE Top" {% if item.item_type == 'BHS PE Top' %}selected{% endif %}>BHS PE Top</option>
+            <option value="BHS Scarf" {% if item.item_type == 'BHS Scarf' %}selected{% endif %}>BHS Scarf</option>
+            <option value="BHS Short-sleeved shirt" {% if item.item_type == 'BHS Short-sleeved shirt' %}selected{% endif %}>BHS Short-sleeved shirt</option>
+            <option value="BHS Shorts" {% if item.item_type == 'BHS Shorts' %}selected{% endif %}>BHS Shorts</option>
+            <option value="BHS Skirt" {% if item.item_type == 'BHS Skirt' %}selected{% endif %}>BHS Skirt</option>
+            <option value="BHS Sleveless vest" {% if item.item_type == 'BHS Sleveless vest' %}selected{% endif %}>BHS Sleveless vest</option>
+            <option value="BHS Socks" {% if item.item_type == 'BHS Socks' %}selected{% endif %}>BHS Socks</option>
+            <option value="BHS Tie" {% if item.item_type == 'BHS Tie' %}selected{% endif %}>BHS Tie</option>
+            <option value="BHS Tights" {% if item.item_type == 'BHS Tights' %}selected{% endif %}>BHS Tights</option>
+            <option value="BHS Tracksuit" {% if item.item_type == 'BHS Tracksuit' %}selected{% endif %}>BHS Tracksuit</option>
+            <option value="BHS Trousers" {% if item.item_type == 'BHS Trousers' %}selected{% endif %}>BHS Trousers</option>
+            <option value="BHS V-necked jersey" {% if item.item_type == 'BHS V-necked jersey' %}selected{% endif %}>BHS V-necked jersey</option>
+            <option value="Blazer" {% if item.item_type == 'Blazer' %}selected{% endif %}>Blazer</option>
+            <option value="Cap" {% if item.item_type == 'Cap' %}selected{% endif %}>Cap</option>
+            <option value="Cardigan" {% if item.item_type == 'Cardigan' %}selected{% endif %}>Cardigan</option>
+            <option value="Coat" {% if item.item_type == 'Coat' %}selected{% endif %}>Coat</option>
+            <option value="Dress" {% if item.item_type == 'Dress' %}selected{% endif %}>Dress</option>
+            <option value="Hair tie" {% if item.item_type == 'Hair tie' %}selected{% endif %}>Hair tie</option>
+            <option value="Hat" {% if item.item_type == 'Hat' %}selected{% endif %}>Hat</option>
+            <option value="Hoodie" {% if item.item_type == 'Hoodie' %}selected{% endif %}>Hoodie</option>
+            <option value="Jacket" {% if item.item_type == 'Jacket' %}selected{% endif %}>Jacket</option>
+            <option value="Jandals" {% if item.item_type == 'Jandals' %}selected{% endif %}>Jandals</option>
+            <option value="Jeans" {% if item.item_type == 'Jeans' %}selected{% endif %}>Jeans</option>
+            <option value="Jersey" {% if item.item_type == 'Jersey' %}selected{% endif %}>Jersey</option>
+            <option value="Long Skirt" {% if item.item_type == 'Long Skirt' %}selected{% endif %}>Long Skirt</option>
+            <option value="Long-sleeved Shirt" {% if item.item_type == 'Long-sleeved Shirt' %}selected{% endif %}>Long-sleeved Shirt</option>
+            <option value="Pants" {% if item.item_type == 'Pants' %}selected{% endif %}>Pants</option>
+            <option value="Scarf" {% if item.item_type == 'Scarf' %}selected{% endif %}>Scarf</option>
+            <option value="Shirt" {% if item.item_type == 'Shirt' %}selected{% endif %}>Shirt</option>
+            <option value="Shorts" {% if item.item_type == 'Shorts' %}selected{% endif %}>Shorts</option>
+            <option value="Skirt" {% if item.item_type == 'Skirt' %}selected{% endif %}>Skirt</option>
+            <option value="Socks" {% if item.item_type == 'Socks' %}selected{% endif %}>Socks</option>
+            <option value="T-Shirt" {% if item.item_type == 'T-Shirt' %}selected{% endif %}>T-Shirt</option>
+            <option value="Tank top" {% if item.item_type == 'Tank top' %}selected{% endif %}>Tank top</option>
+            <option value="Tie" {% if item.item_type == 'Tie' %}selected{% endif %}>Tie</option>
+            <option value="Tights" {% if item.item_type == 'Tights' %}selected{% endif %}>Tights</option>
+        </select>
+
+        <h2 class="upload_form_subtitle">Colour:</h2>
+        
+        <fieldset class='upload_colour_selection'>
+            <label>
+                <input type="checkbox" name="colours[]" value="BHS Uniform" {% if 'BHS Uniform' in colour_names %}checked{% endif %}> BHS Uniform
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Red" {% if 'Red' in colour_names %}checked{% endif %}> Red
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Orange" {% if 'Orange' in colour_names %}checked{% endif %}> Orange
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Yellow" {% if 'Yellow' in colour_names %}checked{% endif %}> Yellow
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Green" {% if 'Light Green' in colour_names %}checked{% endif %}> Light Green
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Green" {% if 'Dark Green' in colour_names %}checked{% endif %}> Dark Green
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Blue" {% if 'Light Blue' in colour_names %}checked{% endif %}> Light Blue
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Blue" {% if 'Dark Blue' in colour_names %}checked{% endif %}> Dark Blue
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Navy Blue" {% if 'Navy Blue' in colour_names %}checked{% endif %}> Navy Blue
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Purple" {% if 'Light Purple' in colour_names %}checked{% endif %}> Light Purple
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Purple" {% if 'Dark Purple' in colour_names %}checked{% endif %}> Dark Purple
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Pink" {% if 'Pink' in colour_names %}checked{% endif %}> Pink
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Brown/Tan" {% if 'Light Brown/Tan' in colour_names %}checked{% endif %}> Light Brown/Tan
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Brown" {% if 'Dark Brown' in colour_names %}checked{% endif %}> Dark Brown
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="White" {% if 'White' in colour_names %}checked{% endif %}> White
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Light Grey" {% if 'Light Grey' in colour_names %}checked{% endif %}> Light Grey
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Dark Grey" {% if 'Dark Grey' in colour_names %}checked{% endif %}> Dark Grey
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Black" {% if 'Black' in colour_names %}checked{% endif %}> Black
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Cream" {% if 'Cream' in colour_names %}checked{% endif %}> Cream
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Gold" {% if 'Gold' in colour_names %}checked{% endif %}> Gold
+            </label>
+            <label>
+                <input type="checkbox" name="colours[]" value="Silver" {% if 'Silver' in colour_names %}checked{% endif %}> Silver
+            </label>
+        </fieldset>
+  
+
+
+        <h2 class="upload_form_subtitle">Time found:</h2>
+        <p> e.g. 06/07/2026, 01:50 PM</p>
+        <input class='upload_datetime' type="datetime-local" name="time_found" value="{{item.time_found}}">
+
+        <h2 class="upload_form_subtitle">Size:</h2>
+        <input class='upload_text_box' type="text" name="size" maxlength="10" value="{{item.size}}">
+
+        <h2 class="upload_form_subtitle">Nametag:</h2>
+        <input type="text" name="nametag" value="{{item.nametag}}">
+
+        <h2 class="upload_form_subtitle">Notes:</h2>
+        <input class='upload_text_box' type="text" name="notes" value="{{item.notes}}">
+
+        <h2 class="upload_form_subtitle">Item Status:</h2>
+        <select name="item_status" class="upload_type_dropdown">
+            <option value="LOST AND FOUND" {% if item.status == 'LOST AND FOUND' %}selected{% endif %}>Lost and Found</option>
+            <option value="LOOKING FOR" {% if item.status == 'LOOKING FOR' %}selected{% endif %}>Looking for</option>
+            <option value="RETURNED" {% if item.status == 'RETURNED' %}selected{% endif %}>Returned</option>
+        </select>
+
+        <input class='upload_submit_button' type="submit" value="Save Changes">
+
+    </div>
+</form>
+{% endfor  %}
 {% endblock %}
