@@ -245,9 +245,13 @@ def settings():
 @login_required
 def dashboard():
     '''Route for the dashboard containing information for logged in users'''
-
+    lost_items = LostItem.query.filter_by(finder_id=current_user.school_code, status='LOOKING FOR').all()
+    lost_and_found_items = LostItem.query.filter_by(finder_id=current_user.school_code, status='LOST AND FOUND').all()
     print(current_user.is_authenticated)
-    return render_template('dashboard.html', title='Dashboard')
+    return render_template('dashboard.html',
+                           title='Dashboard',
+                           lost_items=lost_items,
+                           lost_and_found_items=lost_and_found_items)
 
 
 @app.route('/admin', methods=['POST', 'GET'])
