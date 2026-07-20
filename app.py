@@ -188,13 +188,11 @@ def upload():
             if colour:
                 item.colours.append(colour)
 
-
-        db.session.add(item)
-        
-        
+        db.session.add(item)       
         db.session.commit()
-        
         print('added')
+
+        flash('Item uploaded successfully')
         
     return render_template('upload.html',
                            title='Upload',)
@@ -209,19 +207,34 @@ def find():
 
     if request.method == 'POST':
         finder_id = current_user.school_code
-        item_type = request.form.get('item_type') or None
-        
+        item_type = request.form.get('item_type')
+        item_colours = request.form.getlist('colours[]')
+        time_found = request.form.get('time_found') or None
+        size = request.form.get('size') or None
+        nametag = request.form.get('nametag') or None
+        status = 'LOOKING FOR'
+        notes = request.form.get('notes') or None
 
+        item = LostItem(finder_id=finder_id,
+                       item_type=item_type,
+                       time_found=time_found,
+                       size=size,
+                       nametag=nametag,
+                       status=status,
+                       notes=notes)
         
-        
-        missing_items = LostItem.query.filter_by(finder_id=finder_id,
-                                                 item_type=item_type,
-                                                 status='LOST AND FOUND')
-        
+        for item_colour in item_colours:
+            colour = Colour.query.filter_by(name=item_colour).first()
+            if colour:
+                item.colours.append(colour)
+
+        db.session.add(item)
+        db.session.commit()
+
+        flash('Request submitted successfully, a response may take a few days')
 
         return render_template('find.html',
                                title='Find')
-
     return render_template('find.html',
                            title='Find',)
 
@@ -251,7 +264,8 @@ def dashboard():
     return render_template('dashboard.html',
                            title='Dashboard',
                            lost_items=lost_items,
-                           lost_and_found_items=lost_and_found_items)
+                           lost_and_found_items=lost_and_found_items,
+                           user_name = (f'{current_user.first_name} {current_user.last_name}'))
 
 
 @app.route('/admin', methods=['POST', 'GET'])
@@ -277,6 +291,11 @@ def admin():
 
 @app.route('/item/<int:item_id>', methods=['GET', 'POST'])
 def item(item_id):
+    if session['clearance'] > 1:   # Clearance check
+    # If the user isnt an admin, they need to be the finder of the item
+        if current_user.school_code != item.finder_id:
+            return redirect('/404')
+
     item = LostItem.query.get_or_404(item_id)
     items = [item]
     # getting list of colours for preselecting colour options
@@ -304,9 +323,13 @@ def item(item_id):
     return render_template('item.html', title='Edit Item', items=items, colour_names=colour_names)
 
 
-@app.route('/item/<int:item_id>/delete', methods=['POST'])
+@app.route('/item/<int:item_id>/delete', methods=['POST', 'GET'])
 def delete(item_id):
     item = LostItem.query.get_or_404(item_id)
+    if session['clearance'] > 1:   # Clearance check
+    # If the user isnt an admin, they need to be the finder of the item
+        if current_user.school_code != item.finder_id:
+            return redirect('/404')
     db.session.delete(item)
     db.session.commit()
     flash('Item deleted successfully')
@@ -507,8 +530,6 @@ def page_not_found(e):
                            title="Page Not Found",
                            error_title="Oops, you must be lost",
                            error_message="404 page not found"), 404
-
-
 
 
 if __name__ == "__main__":

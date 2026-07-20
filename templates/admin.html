@@ -5,6 +5,19 @@
     Admin Panel
 </h1>
 
+<!-- Flash messages start -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class=flashes>
+      {% for message in messages %}
+        <div>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 <form method="post" action="/admin">
     <div class="upload_form">
         <h2 class="upload_form_subtitle">Item Type</h2>
@@ -183,7 +196,11 @@
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
       <td>{{item.notes}}</td>
-      <td>test</td>
+      <td class="edit_item_button">
+        <form method="post" action="/item/{{item.item_id}}/delete" class="delete_button_form">
+          <button type="submit" class="upload_submit_button">Delete</button>
+        </form>
+      </td>
     </tr>
     {% endfor %}
 </table>

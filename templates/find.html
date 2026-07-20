@@ -3,9 +3,22 @@
 
 <h1 class="title">Find</h1>
 
+<!-- Flash messages start -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class=flashes>
+      {% for message in messages %}
+        <div>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 <form method="post" action="/find">
-    <div class="upload_form">
-        <h2 class="upload_form_subtitle">Item Type</h2>
+   <div class="upload_form">
+        <h2 class="upload_form_subtitle">Item Type:</h2>
         <select name="item_type" class="upload_type_dropdown">
             <option value="BHS Beanie">BHS Beanie</option>
             <option value="BHS Blazer">BHS Blazer</option>
@@ -52,8 +65,8 @@
             <option value="Tights">Tights</option>
         </select>
 
-        <h2 class="upload_form_subtitle">Colour</h2>
-        <fieldset>
+        <h2 class="upload_form_subtitle">Colour:</h2>
+        <fieldset class='upload_colour_selection'>
             <label>
                 <input type="checkbox" name="colours[]" value="BHS Uniform"> BHS Uniform
             </label>
@@ -118,10 +131,28 @@
                 <input type="checkbox" name="colours[]" value="Silver"> Silver
             </label>
         </fieldset>
+  
+
+
+        <h2 class="upload_form_subtitle">Time found:</h2>
+        <p> e.g. 06/07/2026, 01:50 PM</p>
+        <input class='upload_datetime' type="datetime-local" name="time_found">
+
+        <h2 class="upload_form_subtitle">Size:</h2>
+        <input class='upload_text_box' type="text" name="size" maxlength="10">
+
+        <h2 class="upload_form_subtitle">Nametag:</h2>
+        <p>Leave empty if none</p>
+        <input type="text" name="nametag" maxlength="20">
+
+        <h2 class="upload_form_subtitle">Notes:</h2>
+        <p>Please provide as many extra details as possible (e.g. location found, items in each pocket, significant markings etc.)</p>
+        <input class='upload_text_box' type="text" name="notes" maxlength="50">
 
         <input class='upload_submit_button' type="submit" value="submit">
     </div>
-
 </form>
+
+
 
 {% endblock %}
