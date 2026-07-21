@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, flash, session, redirect
 from flask_session import Session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 # email stuff
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -16,6 +17,74 @@ import auth
 
 # Constants
 DATABASE = 'lost_and_found.db'
+ITEM_TYPE_LIST = [
+    "BHS Beanie",
+    "BHS Blazer",
+    "BHS Cardigan",
+    "BHS Jacket",
+    "BHS Lavalava",
+    "BHS Long-sleeved shirt",
+    "BHS PE Shorts",
+    "BHS PE Top",
+    "BHS Scarf",
+    "BHS Short-sleeved shirt",
+    "BHS Shorts",
+    "BHS Skirt",
+    "BHS Sleveless vest",
+    "BHS Socks",
+    "BHS Tie",
+    "BHS Tights",
+    "BHS Tracksuit",
+    "BHS Trousers",
+    "BHS V-necked jersey",
+    "Blazer",
+    "Cap",
+    "Cardigan",
+    "Coat",
+    "Dress",
+    "Hair tie",
+    "Hat",
+    "Hoodie",
+    "Jacket",
+    "Jandals",
+    "Jeans",
+    "Jersey",
+    "Long Skirt",
+    "Long-sleeved Shirt",
+    "Pants",
+    "Scarf",
+    "Shirt",
+    "Shorts",
+    "Skirt",
+    "Socks",
+    "T-Shirt",
+    "Tank top",
+    "Tie",
+    "Tights"
+]
+COLOUR_LIST = [
+    "BHS Uniform",
+    "Red",
+    "Orange",
+    "Yellow",
+    "Light Green",
+    "Dark Green",
+    "Light Blue",
+    "Dark Blue",
+    "Navy Blue",
+    "Purple",
+    "Pink",
+    "Light Brown/Tan",
+    "Dark Brown",
+    "White",
+    "Light Grey",
+    "Dark Grey",
+    "Black",
+    "Cream",
+    "Gold",
+    "Silver"
+]
+
 # flask session stuff
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -107,6 +176,7 @@ login_manager.init_app(app)
 # redirects users to login page if they need to login to access a page
 login_manager.login_view = "login"
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -134,22 +204,6 @@ def home():
                            )
 
 
-@app.route('/search', methods=['POST', 'GET'])
-@login_required
-def search():
-    '''
-    Docstring for search
-    '''
-    if session['clearance'] > 1:   # Clearance check
-        # Uers below clearance 1 cannot access this page
-        return render_template('error.html',
-                               title='Access Forbidon',
-                               error_title='Forbiddon',
-                               error_message='You do not have permission to access this page')
-    return render_template('search.html',
-                           title='Search',)
-
-
 @app.route('/upload', methods=['POST', 'GET'])
 @login_required
 def upload():
@@ -157,7 +211,7 @@ def upload():
     Docstring for upload
     '''
     if session['clearance'] > 1:   # Clearance check
-        # Uers below clearance 1 cannot access this page
+        # Users below clearance 1 cannot access this page
         return render_template('error.html',
                                title='Access Forbidon',
                                error_title='Forbiddon',
@@ -173,7 +227,17 @@ def upload():
         status = 'LOST AND FOUND'
         notes = request.form.get('notes') or None
 
-        print(item_colours)
+        # backend data check
+        if item_type not in ITEM_TYPE_LIST:
+            flash('Please provide a item type')
+            return redirect('/upload')
+        for colour in item_colours:
+            if colour not in COLOUR_LIST:
+                flash('Please provide valid colours')
+                return redirect('/upload')
+        if len(size) > 10 or len(nametag) > 20 or len(notes) > 67:
+            flash('Please provide valid lengths for your inputs')
+            return redirect('/upload')
 
         item = LostItem(finder_id=finder_id,
                        item_type=item_type,
@@ -184,13 +248,15 @@ def upload():
                        notes=notes)
         
         for item_colour in item_colours:
+            # checking if colour is valid
             colour = Colour.query.filter_by(name=item_colour).first()
             if colour:
                 item.colours.append(colour)
+        
+        
 
         db.session.add(item)       
         db.session.commit()
-        print('added')
 
         flash('Item uploaded successfully')
         
@@ -209,7 +275,7 @@ def find():
         finder_id = current_user.school_code
         item_type = request.form.get('item_type')
         item_colours = request.form.getlist('colours[]')
-        time_found = request.form.get('time_found') or None
+        time_missing = request.form.get('time_found') or None
         size = request.form.get('size') or None
         nametag = request.form.get('nametag') or None
         status = 'LOOKING FOR'
@@ -217,7 +283,7 @@ def find():
 
         item = LostItem(finder_id=finder_id,
                        item_type=item_type,
-                       time_found=time_found,
+                       time_found=time_missing,
                        size=size,
                        nametag=nametag,
                        status=status,
@@ -272,7 +338,7 @@ def dashboard():
 @login_required
 def admin():
     if session['clearance'] > 1:   # Clearance check
-        # Uers below clearance 1 cannot access this page
+        # Users below clearance 1 cannot access this page
         return render_template('error.html',
                                title='Access Forbidon',
                                error_title='Forbiddon',
@@ -290,6 +356,7 @@ def admin():
 
 
 @app.route('/item/<int:item_id>', methods=['GET', 'POST'])
+@login_required
 def item(item_id):
     if session['clearance'] > 1:   # Clearance check
     # If the user isnt an admin, they need to be the finder of the item
@@ -324,6 +391,7 @@ def item(item_id):
 
 
 @app.route('/item/<int:item_id>/delete', methods=['POST', 'GET'])
+@login_required
 def delete(item_id):
     item = LostItem.query.get_or_404(item_id)
     if session['clearance'] > 1:   # Clearance check
@@ -445,8 +513,8 @@ def signup():
         # generating email with random confirmation code
         message = MIMEMultipart()  # setting up email format
         message['From'] = auth.sender_email
-        message['To'] = f'{school_code}@burnside.school.nz'
-        print(f'{school_code}@burnside.school.nz')
+        message['To'] = f'{school_code}{auth.domain_name}'
+        print(f'{school_code}{auth.domain_name}')
         message['Subject'] = 'Lost and Found BHS confirmation code'
         body = f'Kia ora,\nHere is your confirmation code: {correct_number}'
         message.attach(MIMEText(body, 'plain'))
