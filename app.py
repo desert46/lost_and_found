@@ -210,12 +210,7 @@ def upload():
     '''
     Docstring for upload
     '''
-    if session['clearance'] > 1:   # Clearance check
-        # Users below clearance 1 cannot access this page
-        return render_template('error.html',
-                               title='Access Forbidon',
-                               error_title='Forbiddon',
-                               error_message='You do not have permission to access this page')
+    # any logged in user can access this page
     
     if request.method == 'POST':
         finder_id = current_user.school_code
@@ -235,9 +230,18 @@ def upload():
             if colour not in COLOUR_LIST:
                 flash('Please provide valid colours')
                 return redirect('/upload')
-        if len(size) > 10 or len(nametag) > 20 or len(notes) > 67:
-            flash('Please provide valid lengths for your inputs')
-            return redirect('/upload')
+        if size is not None:
+            if len(size) > 10:
+                flash('Please provide valid lengths for your inputs')
+                return redirect('/upload')
+        if nametag is not None:
+            if len(nametag) > 20:
+                flash('Please provide valid lengths for your inputs')
+                return redirect('/upload')
+        if notes is not None:
+            if len(notes) > 67:
+                flash('Please provide valid lengths for your inputs')
+                return redirect('/upload')
 
         item = LostItem(finder_id=finder_id,
                        item_type=item_type,
@@ -252,8 +256,6 @@ def upload():
             colour = Colour.query.filter_by(name=item_colour).first()
             if colour:
                 item.colours.append(colour)
-        
-        
 
         db.session.add(item)       
         db.session.commit()
@@ -325,7 +327,8 @@ def settings():
 def dashboard():
     '''Route for the dashboard containing information for logged in users'''
     lost_items = LostItem.query.filter_by(finder_id=current_user.school_code, status='LOOKING FOR').all()
-    lost_and_found_items = LostItem.query.filter_by(finder_id=current_user.school_code, status='LOST AND FOUND').all()
+    lost_and_found_items = LostItem.query.filter_by(finder_id=current_user.school_code,
+                                                    status='LOST AND FOUND').all()
     print(current_user.is_authenticated)
     return render_template('dashboard.html',
                            title='Dashboard',
