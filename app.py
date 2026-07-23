@@ -109,6 +109,7 @@ class User(db.Model, UserMixin):
     school_code = db.Column(db.String(20), nullable=False, unique=True)
     clearance = db.Column(db.Integer, default=4)
 
+    # Change the default 'id' column to be called 'user_id'
     def get_id(self):
         return str(self.user_id)
 
@@ -134,40 +135,12 @@ class Colour(db.Model):
     name = db.Column(db.String(50))
 
 
-# table in the middle that links LostItem and Colour
+# the linking table that links LostItem and Colour
 lostitem_colour = db.Table(
     'lostitem_colour', 
     db.Column('iid', db.Integer, db.ForeignKey('lost_item.item_id')),
     db.Column('cid', db.Integer, db.ForeignKey('colour.colour_id'))
 )
-
-# testing routes
-@login_required
-@app.route('/test')
-def test():
-    results = User.query.all()
-    print(current_user.school_code)
-    for i in results:
-        print(i.first_name)
-
-    print('test')
-    print(current_user.is_authenticated)
-    print(session['clearance'])
-    return render_template('test.html', title='test', example=results,)
-
-
-@app.route('/add')
-def add():
-    add = User(first_name='Alex', last_name='Yao', password='heheheha', school_code='22177')
-    db.session.add(add)
-    db.session.commit()
-    return 'added data successfully'
-
-
-@app.route('/create')
-def create():
-    db.create_all()
-    return 'donezo'
 
 
 # Flask_Login Stuff
@@ -179,16 +152,18 @@ login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
+    '''User oader for Flask Login'''
     return User.query.get(int(user_id))
 
 
-# routes
 @app.context_processor
 def inject_variables():
     '''This route injects these variable into every route'''
     return dict(show_footer=True,
                 logged_in = current_user.is_authenticated)
 
+
+# Beginning of Routes/Pages
 # ensures that /, /index, and /home all lead to the same home page
 @app.route('/')
 @app.route('/index')
@@ -270,7 +245,7 @@ def upload():
 @login_required
 def find():
     '''
-    Docstring for find
+    This is the page where users can submit an item that they have lost.
     '''
 
     if request.method == 'POST':
@@ -310,7 +285,7 @@ def find():
 @app.route('/about', methods=['POST', 'GET'])
 def about():
     '''
-    Docstring for about
+    Route for about page. Page contains general information about the site
     '''
     return render_template('about.html',
                            title='About',)
@@ -319,6 +294,7 @@ def about():
 @app.route('/settings', methods=['POST', 'GET'])
 @login_required
 def settings():
+    '''Route for settings'''
     return render_template('settings.html', title='Settings')
 
 
@@ -340,7 +316,7 @@ def dashboard():
 @app.route('/admin', methods=['POST', 'GET'])
 @login_required
 def admin():
-    if session['clearance'] > 1:   # Clearance check
+    if session['clearance'] > 1:   # Clearance check, Admins only
         # Users below clearance 1 cannot access this page
         return render_template('error.html',
                                title='Access Forbidon',
@@ -350,8 +326,8 @@ def admin():
     lost_and_found_items = LostItem.query.filter_by(status='LOST AND FOUND').all()
     missing_items = LostItem.query.filter_by(status='LOOKING FOR').all()
 
-    for item in lost_and_found_items:
-        print(item.time_found)
+    for item in lost_and_found_items + missing_items:
+        item.colour_names = [colour.name for colour in item.colours]
     
     return render_template('admin.html', title='Admin',
                            lost_and_found_items=lost_and_found_items,
@@ -361,7 +337,7 @@ def admin():
 @app.route('/item/<int:item_id>', methods=['GET', 'POST'])
 @login_required
 def item(item_id):
-    if session['clearance'] > 1:   # Clearance check
+    if session['clearance'] > 1:   # Clearance check, Admin or Finder only
     # If the user isnt an admin, they need to be the finder of the item
         if current_user.school_code != item.finder_id:
             return redirect('/404')

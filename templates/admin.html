@@ -166,7 +166,17 @@
       <td>{{item.size}}</td>
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
-      <td>{{item.colour_names}}</td>
+      <td>
+        {% if item.colour_names %}
+          <ul class="colour_list">
+            {% for colour in item.colour_names %}
+              <li>{{ colour }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          -
+        {% endif %}
+      </td>
       <td>{{item.notes}}</td>
       <td class="edit_item_button"><a href="/item/{{item.item_id}}">Edit</a></td>
     </tr>
@@ -182,7 +192,7 @@
       <th class="item_info_header">Item size</th>
       <th class="item_info_header">Nametag (If any)</th>
       <th class="item_info_header">Status</th>
-      <th class="item_info_header">Colour</th>
+      <th class="item_info_header">Colours</th>
       <th class="item_info_header">Notes</th>
       <th class="item_info_header">Action</th>
     </tr> 
@@ -194,7 +204,17 @@
       <td>{{item.size}}</td>
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
-      <td>{{item.colour_names}}</td>
+
+      <td>
+        {% if item.colour_names %}
+            {% for colour in item.colour_names %}
+              {{ colour }},
+            {% endfor %}
+        {% else %}
+          None
+        {% endif %}
+      </td>
+
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
         <form method="post" action="/item/{{item.item_id}}/delete" class="delete_button_form">

@@ -7,19 +7,18 @@
 <table class="item_info_table">
   <h2 class="sub_heading">Lost and Found items</h2>
     <tr>
-      <th class="item_info_header">Item ID</th>
       <th class="item_info_header">Finder's code</th>
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
       <th class="item_info_header">Item size</th>
       <th class="item_info_header">Nametag (If any)</th>
       <th class="item_info_header">Status</th>
+      <th class="item_info_header">Colours</th>
       <th class="item_info_header">Notes</th>
       <th class="item_info_header">Action</th>
     </tr> 
     
     <tr class="item_info_row">
-      <th>{{item.item_id}}</th>
       <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>
       <!-- formatting date and time into a more readable format -->
@@ -33,6 +32,15 @@
       <td>{{item.size}}</td>
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
+      <td>
+        {% if colour_names %}
+            {% for colour in colour_names %}
+              {{ colour }},
+            {% endfor %}
+        {% else %}
+          None
+        {% endif %}
+      </td>
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
         <form method="post" action="/item/{{item.item_id}}/delete" class="delete_button_form">
@@ -42,8 +50,9 @@
     </tr>
 </table>
 
-{{colour_names}}
-
+<div class="match_button">
+    test
+</div>
 
 <form method="post" action="/item/{{item.item_id}}">
     <div class="upload_form">
