@@ -97,10 +97,7 @@
                 <input type="checkbox" name="colours[]" value="Navy Blue"> Navy Blue
             </label>
             <label>
-                <input type="checkbox" name="colours[]" value="Light Purple"> Light Purple
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Dark Purple"> Dark Purple
+                <input type="checkbox" name="colours[]" value="Purple"> Purple
             </label>
             <label>
                 <input type="checkbox" name="colours[]" value="Pink"> Pink
@@ -166,15 +163,13 @@
       <td>{{item.size}}</td>
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
-      <td>
+            <td>
         {% if item.colour_names %}
-          <ul class="colour_list">
             {% for colour in item.colour_names %}
-              <li>{{ colour }}</li>
+              {{ colour }},
             {% endfor %}
-          </ul>
         {% else %}
-          -
+          None
         {% endif %}
       </td>
       <td>{{item.notes}}</td>
@@ -204,17 +199,15 @@
       <td>{{item.size}}</td>
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
-
       <td>
-        {% if item.colour_names %}
-            {% for colour in item.colour_names %}
+        {% if colour_names %}
+            {% for colour in colour_names %}
               {{ colour }},
             {% endfor %}
         {% else %}
           None
         {% endif %}
       </td>
-
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
         <form method="post" action="/item/{{item.item_id}}/delete" class="delete_button_form">

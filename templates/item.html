@@ -1,7 +1,21 @@
 {% extends "layout.html" %} 
 {% block content %}
 
-<h1 class="title">Item</h1>
+<h1 class="title">Item ID [{{item_id}}]</h1>
+
+<!-- Flash messages start -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class=flashes>
+      {% for message in messages %}
+        <div>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+<!-- Flash messages end -->
 
 {% for item in items %}
 <table class="item_info_table">
@@ -43,9 +57,7 @@
       </td>
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
-        <form method="post" action="/item/{{item.item_id}}/delete" class="delete_button_form">
-          <button type="submit" class="upload_submit_button">Delete</button>
-        </form>
+        <a href="/item/{{item.item_id}}/delete">Delete</a>
       </td>
     </tr>
 </table>
@@ -134,10 +146,7 @@
                 <input type="checkbox" name="colours[]" value="Navy Blue" {% if 'Navy Blue' in colour_names %}checked{% endif %}> Navy Blue
             </label>
             <label>
-                <input type="checkbox" name="colours[]" value="Light Purple" {% if 'Light Purple' in colour_names %}checked{% endif %}> Light Purple
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Dark Purple" {% if 'Dark Purple' in colour_names %}checked{% endif %}> Dark Purple
+                <input type="checkbox" name="colours[]" value="Light Purple" {% if 'Purple' in colour_names %}checked{% endif %}> Purple
             </label>
             <label>
                 <input type="checkbox" name="colours[]" value="Pink" {% if 'Pink' in colour_names %}checked{% endif %}> Pink

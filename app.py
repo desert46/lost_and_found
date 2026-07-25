@@ -85,6 +85,31 @@ COLOUR_LIST = [
     "Silver"
 ]
 
+# Functions
+def validate_item_data(item_type, item_colours, size, nametag, notes):
+    '''
+    Function to validate item changes so they align with certain parameters
+    Inputs: item_type, item_colours, size, nametag, notes
+    Outputs: is_valid, error_message
+    '''
+    if item_type not in ITEM_TYPE_LIST:
+        return False, 'Please provide a item type'
+    
+    for colour in item_colours:
+        if colour not in COLOUR_LIST:
+            return False, 'Please provide valid colours'
+    
+    if size is not None and len(size) > 10:
+        return False, 'Please provide valid lengths for your inputs'
+    
+    if nametag is not None and len(nametag) > 20:
+        return False, 'Please provide valid lengths for your inputs'
+    
+    if notes is not None and len(notes) > 67:
+        return False, 'Please provide valid lengths for your inputs'
+    
+    return True, None
+
 # flask session stuff
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -197,26 +222,11 @@ def upload():
         status = 'LOST AND FOUND'
         notes = request.form.get('notes') or None
 
-        # backend data check
-        if item_type not in ITEM_TYPE_LIST:
-            flash('Please provide a item type')
+        # backend data check for item data
+        is_valid, error_message = validate_item_data(item_type, item_colours, size, nametag, notes)
+        if not is_valid:
+            flash(error_message)
             return redirect('/upload')
-        for colour in item_colours:
-            if colour not in COLOUR_LIST:
-                flash('Please provide valid colours')
-                return redirect('/upload')
-        if size is not None:
-            if len(size) > 10:
-                flash('Please provide valid lengths for your inputs')
-                return redirect('/upload')
-        if nametag is not None:
-            if len(nametag) > 20:
-                flash('Please provide valid lengths for your inputs')
-                return redirect('/upload')
-        if notes is not None:
-            if len(notes) > 67:
-                flash('Please provide valid lengths for your inputs')
-                return redirect('/upload')
 
         item = LostItem(finder_id=finder_id,
                        item_type=item_type,
@@ -257,6 +267,12 @@ def find():
         nametag = request.form.get('nametag') or None
         status = 'LOOKING FOR'
         notes = request.form.get('notes') or None
+
+        # backend data check for item data
+        is_valid, error_message = validate_item_data(item_type, item_colours, size, nametag, notes)
+        if not is_valid:
+            flash(error_message)
+            return redirect('/find')
 
         item = LostItem(finder_id=finder_id,
                        item_type=item_type,
@@ -342,7 +358,10 @@ def item(item_id):
         if current_user.school_code != item.finder_id:
             return redirect('/404')
 
+    print(item_id)
+
     item = LostItem.query.get_or_404(item_id)
+
     items = [item]
     # getting list of colours for preselecting colour options
     colour_names = [colour.name for colour in item.colours]
@@ -356,6 +375,17 @@ def item(item_id):
         item.status = request.form.get('item_status') or None
         item.notes = request.form.get('notes') or None
 
+        # backend data check for item data
+        is_valid, error_message = validate_item_data(item.item_type,
+                                                     item_colours,
+                                                     item.size,
+                                                     item.nametag,
+                                                     item.notes)
+        if not is_valid:
+            flash(error_message)
+            return redirect(f'/item/{item_id}')
+
+        # Clearning original colours
         item.colours.clear()
         for item_colour in item_colours:
             colour = Colour.query.filter_by(name=item_colour).first()
@@ -366,13 +396,15 @@ def item(item_id):
         flash('Item updated successfully')
         return redirect(f'/item/{item_id}')
 
-    return render_template('item.html', title='Edit Item', items=items, colour_names=colour_names)
+    return render_template('item.html', title='Edit Item', items=items, colour_names=colour_names, item_id=item_id)
 
 
 @app.route('/item/<int:item_id>/delete', methods=['POST', 'GET'])
 @login_required
 def delete(item_id):
     item = LostItem.query.get_or_404(item_id)
+    print('test')
+    print(item)
     if session['clearance'] > 1:   # Clearance check
     # If the user isnt an admin, they need to be the finder of the item
         if current_user.school_code != item.finder_id:
@@ -380,7 +412,7 @@ def delete(item_id):
     db.session.delete(item)
     db.session.commit()
     flash('Item deleted successfully')
-    return redirect('/dashboard')
+    return redirect('/admin')
 
 
 @app.route('/login', methods=['POST', 'GET'])
