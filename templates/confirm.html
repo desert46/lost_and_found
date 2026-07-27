@@ -1,3 +1,6 @@
+{% extends "layout.html" %}
+{% block content %}
+
 <form method='post' action="">
     <div>
         <input type="number" name="confirmation_number" required>
@@ -18,3 +21,5 @@
         </div>
     {% endif %}
 {% endwith %}
+
+{% endblock %}

@@ -38,7 +38,7 @@
       <!-- formatting date and time into a more readable format -->
       <td>
         {% if item.time_found is not none %}
-          ({{ item.time_found[11:16] }}) {{ item.time_found[8:10] }}/{{ item.time_found[5:7] }}/{{ item.time_found[0:4] }}
+          ({{ item.time_found[11:16] }})<br>{{ item.time_found[8:10] }}/{{ item.time_found[5:7] }}/{{ item.time_found[0:4] }}
         {% else %}
           {{item.time_found}}
         {% endif %}

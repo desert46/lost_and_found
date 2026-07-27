@@ -155,7 +155,7 @@
       <!-- formatting date and time into a more readable format -->
       <td>
         {% if item.time_found is not none %}
-          ({{ item.time_found[11:16] }}) {{ item.time_found[8:10] }}/{{ item.time_found[5:7] }}/{{ item.time_found[0:4] }}
+          ({{ item.time_found[11:16] }})<br>{{ item.time_found[8:10] }}/{{ item.time_found[5:7] }}/{{ item.time_found[0:4] }}
         {% else %}
           {{item.time_found}}
         {% endif %}
@@ -195,7 +195,14 @@
     <tr class="item_info_row">
       <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>
-      <td>{{item.time_found}}</td>
+      <!-- formatting date and time into a more readable format -->
+      <td>
+        {% if item.time_found is not none %}
+          ({{ item.time_found[11:16] }})<br>{{ item.time_found[8:10] }}/{{ item.time_found[5:7] }}/{{ item.time_found[0:4] }}
+        {% else %}
+          {{item.time_found}}
+        {% endif %}
+      </td>
       <td>{{item.size}}</td>
       <td>{{item.nametag}}</td>
       <td>{{item.status}}</td>
@@ -210,9 +217,9 @@
       </td>
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
-        <form method="post" action="/item/{{item.item_id}}/delete" class="delete_button_form">
-          <button type="submit" class="upload_submit_button">Delete</button>
-        </form>
+        <td class="edit_item_button">
+          <a href="/item/{{item.item_id}}/delete">Delete</a>
+        </td>
       </td>
     </tr>
     {% endfor %}

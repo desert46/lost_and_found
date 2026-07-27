@@ -310,8 +310,45 @@ def about():
 @app.route('/settings', methods=['POST', 'GET'])
 @login_required
 def settings():
-    '''Route for settings'''
+    '''Route for settings. Users can cahnge their password and delete their accounts here'''
+    if request.method == 'POST':
+        old_password = request.form.get('old_password')
+        new_password = request.form.get('new_password')
+        current_hashed_password = current_user.password
+        print(current_hashed_password)
+
+        # Checking if the old passwords match
+        # Hashing old password to compare the hashes to the current password
+        h = hashlib.new("SHA256")
+        h.update(old_password.encode())
+        old_hashed_password = h.hexdigest()
+
+        # checking that the hashed passwords match
+        if old_hashed_password != current_hashed_password:
+            flash('Incorrect password')
+            return redirect('/settings')
+
+        # Checking the new password is valid
+        if new_password is None:
+            flash('Please provide a valid school code')
+            return redirect('/settings')
+        elif len(new_password) < 6 or len(new_password) > 20:
+            flash('Please provide a valid password length')
+            return redirect('/settings')
+        elif new_password.isalpha():
+            flash("Your password must have a number or special character")
+            return redirect('/settings')
+        else:  # The password is valid
+            # Hashing the new password
+            h = hashlib.new("SHA256")
+            h.update(new_password.encode())
+            new_hashed_password = h.hexdigest()
+            pass
+
+        
     return render_template('settings.html', title='Settings')
+
+
 
 
 @app.route('/dashboard', methods=['POST', 'GET'])
