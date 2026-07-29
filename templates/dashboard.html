@@ -5,6 +5,19 @@
     Dashboard
 </h1>
 
+<!-- Flash messages start -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class=flashes>
+      {% for message in messages %}
+        <div>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+<!-- Flash messages end -->
 
 <table class="item_info_table">
   <h2 class="sub_heading">Items you are looking for</h2>
@@ -74,19 +87,5 @@
     </tr>
     {% endfor %}
 </table>
-
-
-<!-- Flash messages start -->
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div class=flashes>
-      {% for message in messages %}
-        <div>
-          {{ message }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
 
 {% endblock %}

@@ -343,7 +343,11 @@ def settings():
             h = hashlib.new("SHA256")
             h.update(new_password.encode())
             new_hashed_password = h.hexdigest()
-            pass
+            account = User.query.filter_by(school_code=current_user.school_code).first_or_404()
+            account.password = new_hashed_password
+            db.session.commit()
+            print('Password Successfully Updated')
+            flash('Password Successfully Updated')
 
         
     return render_template('settings.html', title='Settings')
@@ -355,10 +359,10 @@ def settings():
 @login_required
 def dashboard():
     '''Route for the dashboard containing information for logged in users'''
-    lost_items = LostItem.query.filter_by(finder_id=current_user.school_code, status='LOOKING FOR').all()
+    lost_items = LostItem.query.filter_by(finder_id=current_user.school_code,
+                                          status='LOOKING FOR').all()
     lost_and_found_items = LostItem.query.filter_by(finder_id=current_user.school_code,
                                                     status='LOST AND FOUND').all()
-    print(current_user.is_authenticated)
     return render_template('dashboard.html',
                            title='Dashboard',
                            lost_items=lost_items,
@@ -394,8 +398,6 @@ def item(item_id):
     # If the user isnt an admin, they need to be the finder of the item
         if current_user.school_code != item.finder_id:
             return redirect('/404')
-
-    print(item_id)
 
     item = LostItem.query.get_or_404(item_id)
 
@@ -461,15 +463,22 @@ def login():
     
     if request.method == 'POST':
         school_code = request.form.get('school_code')
-        password = request.form.get('password')
-        if school_code is None or password is None:
+        inputted_password = request.form.get('password')
+
+        # Backend input checks
+        if school_code is None or inputted_password is None:
             flash('Please provide valid input')
             return redirect('/login')
         account = User.query.filter_by(school_code=school_code).first()
         if account is None:
             flash('School code is incorrect')
             return redirect('/login')
-        if account.password == password:
+
+        # Hashing the inputted password and comparing the hashes
+        h = hashlib.new('SHA256')
+        h.update(inputted_password.encode())
+        hashed_inputted_password = h.hexdigest()
+        if account.password == hashed_inputted_password:
             print('Successful login')
             login_user(account)
             flash('Successful login, welcome')
@@ -562,7 +571,7 @@ def signup():
         message = MIMEMultipart()  # setting up email format
         message['From'] = auth.sender_email
         message['To'] = f'{school_code}{auth.domain_name}'
-        print(f'{school_code}{auth.domain_name}')
+        print(f'Message sent to {school_code}{auth.domain_name}')
         message['Subject'] = 'Lost and Found BHS confirmation code'
         body = f'Kia ora,\nHere is your confirmation code: {correct_number}'
         message.attach(MIMEText(body, 'plain'))
@@ -615,9 +624,19 @@ def confirm():
 
         if int(confirmation_number )== correct_number:
             # Successful account creation
-            add = User(first_name=first_name, last_name=last_name, password=password, school_code=school_code)
+            # Hashing the password
+            h = hashlib.new('SHA256')
+            h.update(password.encode())
+            hashed_password = h.hexdigest()
+
+            # Adding the account into the database
+            add = User(first_name=first_name,
+                       last_name=last_name,
+                       password=hashed_password,
+                       school_code=school_code)
             db.session.add(add)
             db.session.commit()
+
             print(f'Account created successfully for {school_code}')
             flash('Account created successfully')
             session.clear()  # clears the variables
@@ -625,6 +644,12 @@ def confirm():
             account = User.query.filter_by(school_code=school_code).first()
             login_user(account)
             session['clearance'] = account.clearance
+            # Clearing session variables
+            session.pop('first_name', None)
+            session.pop('last_name', None)
+            session.pop('school_code', None)
+            session.pop('password', None)
+            session.pop('correct_number', None)
             return redirect('/dashboard')
         else:
             flash('Wrong confirmation number')
