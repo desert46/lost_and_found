@@ -132,7 +132,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(128), nullable=False) 
     school_code = db.Column(db.String(20), nullable=False, unique=True)
-    clearance = db.Column(db.Integer, default=4)
+    clearance = db.Column(db.Integer, default=2)
 
     # Change the default 'id' column to be called 'user_id'
     def get_id(self):
@@ -305,54 +305,6 @@ def about():
     '''
     return render_template('about.html',
                            title='About',)
-
-
-@app.route('/settings', methods=['POST', 'GET'])
-@login_required
-def settings():
-    '''Route for settings. Users can cahnge their password and delete their accounts here'''
-    if request.method == 'POST':
-        old_password = request.form.get('old_password')
-        new_password = request.form.get('new_password')
-        current_hashed_password = current_user.password
-        print(current_hashed_password)
-
-        # Checking if the old passwords match
-        # Hashing old password to compare the hashes to the current password
-        h = hashlib.new("SHA256")
-        h.update(old_password.encode())
-        old_hashed_password = h.hexdigest()
-
-        # checking that the hashed passwords match
-        if old_hashed_password != current_hashed_password:
-            flash('Incorrect password')
-            return redirect('/settings')
-
-        # Checking the new password is valid
-        if new_password is None:
-            flash('Please provide a valid school code')
-            return redirect('/settings')
-        elif len(new_password) < 6 or len(new_password) > 20:
-            flash('Please provide a valid password length')
-            return redirect('/settings')
-        elif new_password.isalpha():
-            flash("Your password must have a number or special character")
-            return redirect('/settings')
-        else:  # The password is valid
-            # Hashing the new password
-            h = hashlib.new("SHA256")
-            h.update(new_password.encode())
-            new_hashed_password = h.hexdigest()
-            account = User.query.filter_by(school_code=current_user.school_code).first_or_404()
-            account.password = new_hashed_password
-            db.session.commit()
-            print('Password Successfully Updated')
-            flash('Password Successfully Updated')
-
-        
-    return render_template('settings.html', title='Settings')
-
-
 
 
 @app.route('/dashboard', methods=['POST', 'GET'])
@@ -588,15 +540,6 @@ def signup():
     return render_template('signup.html', title='Sign Up')
 
 
-@app.route('/logout')
-def logout():
-    '''This route logs out the user and redirects them to the home page'''
-    logout_user()
-    session.clear()
-    print('User succseffully logged out')
-    return redirect('/index')
-
-
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm():
     '''Confirmation email'''
@@ -659,6 +602,105 @@ def confirm():
 
     return render_template('confirm.html',
                            title='Confirm',)
+
+
+@app.route('/settings', methods=['POST', 'GET'])
+@login_required
+def settings():
+    '''Route for settings. Users can cahnge their password and delete their accounts here'''
+    if request.method == 'POST':
+        old_password = request.form.get('old_password')
+        new_password = request.form.get('new_password')
+        current_hashed_password = current_user.password
+        print(current_hashed_password)
+
+        # Checking if the old passwords match
+        # Hashing old password to compare the hashes to the current password
+        h = hashlib.new("SHA256")
+        h.update(old_password.encode())
+        old_hashed_password = h.hexdigest()
+
+        # checking that the hashed passwords match
+        if old_hashed_password != current_hashed_password:
+            flash('Incorrect password')
+            return redirect('/settings')
+
+        # Checking the new password is valid
+        if new_password is None:
+            flash('Please provide a valid school code')
+            return redirect('/settings')
+        elif len(new_password) < 6 or len(new_password) > 20:
+            flash('Please provide a valid password length')
+            return redirect('/settings')
+        elif new_password.isalpha():
+            flash("Your password must have a number or special character")
+            return redirect('/settings')
+        else:  # The password is valid
+            # Hashing the new password
+            h = hashlib.new("SHA256")
+            h.update(new_password.encode())
+            new_hashed_password = h.hexdigest()
+            account = User.query.filter_by(school_code=current_user.school_code).first_or_404()
+            account.password = new_hashed_password
+            db.session.commit()
+            print('Password Successfully Updated')
+            flash('Password Successfully Updated')
+
+        
+    return render_template('settings.html', title='Settings')
+
+
+@app.route('/delete_account', methods=['POST', 'GET'])
+@login_required
+def delete_account():
+    if request.method == 'POST':
+        inputted_password = request.form.get('password')
+        checkbox = request.form.get('delete_account_checkbox')
+        # Checking for invalid password input
+        if inputted_password is None or inputted_password == '':
+            flash('Please check the checkbox and input your password to proceed')
+            return redirect('/delete_account')
+        # Checking if check box is checked
+        if checkbox != 'Checked':
+            flash('Please check the checkbox and input your password to proceed')
+            return redirect('/delete_account')
+        
+        # Checking if password is correct
+        # Hashing inputted password
+        h = hashlib.new("SHA256")
+        h.update(inputted_password.encode())
+        hashed_inputted_password = h.hexdigest()
+        if hashed_inputted_password == current_user.password:
+            print(f'Deleting the account of {current_user.school_code}')
+            account = User.query.filter_by(school_code=current_user.school_code).first_or_404()
+            # Delete all lost items and their colours associated with the user
+            lost_items = LostItem.query.filter_by(finder_id=account.user_id).all()
+            for item in lost_items:
+                item.colours.clear()
+                db.session.delete(item)
+
+            logout_user()
+            session.clear()
+            db.session.delete(account)
+            db.session.commit()
+
+            flash("Your account has been deleted")
+            return redirect('/home')
+        else:  # incorrect password
+            flash('Incorrect password')
+            return redirect('/delete_account')
+
+
+    return render_template('delete_account.html', title='Delete Account')
+
+
+@app.route('/logout')
+def logout():
+    '''This route logs out the user and redirects them to the home page'''
+    logout_user()
+    session.clear()
+    print('User successfully logged out')
+    return redirect('/index')
 
 
 # error handlers
