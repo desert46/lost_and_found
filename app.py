@@ -1,7 +1,7 @@
 '''This is a prject start during () and ended (). it focuses on the lost proptery system at'''
 
 # imports
-from flask import Flask, render_template, request, flash, session, redirect
+from flask import Flask, render_template, request, flash, session, redirect, abort
 from flask_session import Session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -84,9 +84,38 @@ COLOUR_LIST = [
     "Gold",
     "Silver"
 ]
+LOCATION_LIST = ['N/A',
+                 'A block',
+                 'B block',
+                 'C block',
+                 'D block',
+                 'D Extension'
+                 'E block',
+                 'G block',
+                 'H block',
+                 'K block',
+                 'Learning Centre',
+                 'M block',
+                 'N block',
+                 'P block',
+                 'R block',
+                 'X block',
+                 'Aurora Centre',
+                 'Green Room',
+                 'Library',
+                 'Office/Administration block',
+                 'Quad',
+                 'Cross Gym',
+                 'Hunter Gym',
+                 'Hall',
+                 'Upper Court',
+                 'Pool',
+                 'Upper Fields',
+                 'Lower Fields',
+                 ]
 
 # Functions
-def validate_item_data(item_type, item_colours, size, nametag, notes):
+def validate_item_data(item_type, item_colours, size, nametag, location, notes):
     '''
     Function to validate item changes so they align with certain parameters
     Inputs: item_type, item_colours, size, nametag, notes
@@ -98,6 +127,9 @@ def validate_item_data(item_type, item_colours, size, nametag, notes):
     for colour in item_colours:
         if colour not in COLOUR_LIST:
             return False, 'Please provide valid colours'
+
+    if location not in LOCATION_LIST:
+        return False, 'Please provide a valid location'
     
     if size is not None and len(size) > 10:
         return False, 'Please provide valid lengths for your inputs'
@@ -148,6 +180,7 @@ class LostItem(db.Model):
     time_found = db.Column(db.String(50))
     size = db.Column(db.String(50))
     nametag = db.Column(db.String(50))
+    location = db.Column(db.String(50))
     status = db.Column(db.String(50))
     notes = db.Column(db.String(50))
     colours = db.relationship('Colour', secondary='lostitem_colour', backref='lost_items')
@@ -166,7 +199,6 @@ lostitem_colour = db.Table(
     db.Column('iid', db.Integer, db.ForeignKey('lost_item.item_id')),
     db.Column('cid', db.Integer, db.ForeignKey('colour.colour_id'))
 )
-
 
 # Flask_Login Stuff
 login_manager = LoginManager()
@@ -219,11 +251,12 @@ def upload():
         time_found = request.form.get('time_found') or None
         size = request.form.get('size') or None
         nametag = request.form.get('nametag') or None
+        location = request.form.get('location') or None
         status = 'LOST AND FOUND'
         notes = request.form.get('notes') or None
 
         # backend data check for item data
-        is_valid, error_message = validate_item_data(item_type, item_colours, size, nametag, notes)
+        is_valid, error_message = validate_item_data(item_type, item_colours, size, nametag, location, notes)
         if not is_valid:
             flash(error_message)
             return redirect('/upload')
@@ -233,6 +266,7 @@ def upload():
                        time_found=time_found,
                        size=size,
                        nametag=nametag,
+                       location=location,
                        status=status,
                        notes=notes)
         
@@ -265,11 +299,12 @@ def find():
         time_missing = request.form.get('time_found') or None
         size = request.form.get('size') or None
         nametag = request.form.get('nametag') or None
+        location = request.form.get('location') or None
         status = 'LOOKING FOR'
         notes = request.form.get('notes') or None
 
         # backend data check for item data
-        is_valid, error_message = validate_item_data(item_type, item_colours, size, nametag, notes)
+        is_valid, error_message = validate_item_data(item_type, item_colours, size, nametag, location, notes)
         if not is_valid:
             flash(error_message)
             return redirect('/find')
@@ -279,6 +314,7 @@ def find():
                        time_found=time_missing,
                        size=size,
                        nametag=nametag,
+                       location=location,
                        status=status,
                        notes=notes)
         
@@ -331,6 +367,9 @@ def admin():
                                title='Access Forbidon',
                                error_title='Forbiddon',
                                error_message='You do not have permission to access this page')
+
+    if request.method == 'POST':
+        pass
     
     lost_and_found_items = LostItem.query.filter_by(status='LOST AND FOUND').all()
     missing_items = LostItem.query.filter_by(status='LOOKING FOR').all()
@@ -346,12 +385,13 @@ def admin():
 @app.route('/item/<int:item_id>', methods=['GET', 'POST'])
 @login_required
 def item(item_id):
+    item = LostItem.query.get_or_404(item_id)
+
     if session['clearance'] > 1:   # Clearance check, Admin or Finder only
     # If the user isnt an admin, they need to be the finder of the item
-        if current_user.school_code != item.finder_id:
-            return redirect('/404')
-
-    item = LostItem.query.get_or_404(item_id)
+        if current_user.school_code != str(item.finder_id):
+            print('aborted')
+            abort(404)
 
     items = [item]
     # getting list of colours for preselecting colour options
@@ -363,6 +403,7 @@ def item(item_id):
         item.time_found = request.form.get('time_found') or None
         item.size = request.form.get('size') or None
         item.nametag = request.form.get('nametag') or None
+        item.location = request.form.get('location') or None
         item.status = request.form.get('item_status') or None
         item.notes = request.form.get('notes') or None
 
@@ -371,6 +412,7 @@ def item(item_id):
                                                      item_colours,
                                                      item.size,
                                                      item.nametag,
+                                                     item.location,
                                                      item.notes)
         if not is_valid:
             flash(error_message)
@@ -399,7 +441,7 @@ def delete(item_id):
     if session['clearance'] > 1:   # Clearance check
     # If the user isnt an admin, they need to be the finder of the item
         if current_user.school_code != item.finder_id:
-            return redirect('/404')
+            abort(404)
     db.session.delete(item)
     db.session.commit()
     flash('Item deleted successfully')
