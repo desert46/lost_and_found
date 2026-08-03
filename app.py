@@ -6,10 +6,8 @@ from flask_session import Session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_mail import Mail, Message
 # email stuff
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import random
 import hashlib
 import auth
@@ -149,11 +147,21 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.secret_key = 'secretkey'
 Session(app)
 
-
 # flask sqlalchemy testing stuff
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///lost_and_found.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+
+# Setting up email stuff
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = auth.sender_email
+app.config['MAIL_PASSWORD'] = auth.sender_email_password
+app.config['MAIL_DEFAULT_SENDER'] = auth.sender_email
+
+mail = Mail(app)
 
 # FlaskSQAlchemy tables
 class User(db.Model, UserMixin):
@@ -317,7 +325,8 @@ def find():
                        location=location,
                        status=status,
                        notes=notes)
-        
+
+        # Adding colours one at a time
         for item_colour in item_colours:
             colour = Colour.query.filter_by(name=item_colour).first()
             if colour:
@@ -549,7 +558,7 @@ def signup():
             flash('Provide valid input')
             return redirect('/signup')
         # Checking length of names
-        if len(first_name) <= 1 or len(last_name) <= 1:
+        if len(first_name) < 1 or len(last_name) < 1:
             flash('Please provide a valid name')
             return redirect('/signup')
         # Checking there are no numbers in the names
@@ -565,7 +574,7 @@ def signup():
         if school_code is None:
             flash('Please provide a valid school code')
             return redirect('/signup')
-        elif len(school_code) < 2:
+        elif len(school_code) < 2 or len(school_code) > 5:
             flash('Please provide a valid school code')
             return redirect('/signup')    
         # Checking password
@@ -586,35 +595,37 @@ def signup():
             flash('This account already exists')
             return redirect('/signup')
 
-        # sending the email
-        # Initilising variables for the senders email
-        sender_email = auth.sender_email
-        sender_email_password = auth.sender_email_password
-
-        # storing the variables in the session to be used in the confirm route
+        # Store the variables in the session to be used in the confirm route
         session['first_name'] = first_name
         session['last_name'] = last_name
         session['school_code'] = school_code
         session['password'] = password
-        # generating random 6 digit confirmation code
+
+        # Generate random 6 digit confirmation code
         correct_number = random.randint(100000, 999999)
         session['correct_number'] = correct_number
 
-        # generating email with random confirmation code
-        message = MIMEMultipart()  # setting up email format
-        message['From'] = auth.sender_email
-        message['To'] = f'{school_code}{auth.domain_name}'
-        print(f'Message sent to {school_code}{auth.domain_name}')
-        message['Subject'] = 'Lost and Found BHS confirmation code'
-        body = f'Kia ora,\nHere is your confirmation code: {correct_number}'
-        message.attach(MIMEText(body, 'plain'))
+        # Send confirmation email
+        recipient = f"{school_code}{auth.domain_name}"
 
-        # setting up gmail server, will close as soon as email is sent
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()  # starting server
-            server.login(sender_email, sender_email_password)
-            server.send_message(message)
-            print(f'Email sent successfully to {school_code}@burnside.school.nz')
+        message = Message(
+            subject="Lost and Found BHS Confirmation Code",
+            recipients=[recipient]
+        )
+        # Creating the message inside the email
+        message.body = (
+            f"Kia ora,\n\n"
+            f"Here is your confirmation code: {correct_number}\n\n"
+            f"If you did not request to create an account with us, you can ignore this email."
+        )
+
+        try:
+            mail.send(message)
+            print(f"Email sent successfully to {recipient}")
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+            flash("An error occured, please try again later.")
+            return redirect('/signup')
 
         flash('Enter the confirmation number')
         return redirect('/confirm')
@@ -662,7 +673,6 @@ def confirm():
             db.session.commit()
 
             print(f'Account created successfully for {school_code}')
-            flash('Account created successfully')
             session.clear()  # clears the variables
             # Logging in user after successful account creation
             account = User.query.filter_by(school_code=school_code).first()
@@ -674,6 +684,7 @@ def confirm():
             session.pop('school_code', None)
             session.pop('password', None)
             session.pop('correct_number', None)
+            flash('Account created successfully')
             return redirect('/dashboard')
         else:
             flash('Wrong confirmation number')
