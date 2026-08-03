@@ -16,7 +16,6 @@ import auth
 
 
 # Constants
-DATABASE = 'lost_and_found.db'
 ITEM_TYPE_LIST = [
     "BHS Beanie",
     "BHS Blazer",
@@ -84,35 +83,36 @@ COLOUR_LIST = [
     "Gold",
     "Silver"
 ]
-LOCATION_LIST = ['N/A',
-                 'A block',
-                 'B block',
-                 'C block',
-                 'D block',
-                 'D Extension'
-                 'E block',
-                 'G block',
-                 'H block',
-                 'K block',
-                 'Learning Centre',
-                 'M block',
-                 'N block',
-                 'P block',
-                 'R block',
-                 'X block',
-                 'Aurora Centre',
-                 'Green Room',
-                 'Library',
-                 'Office/Administration block',
-                 'Quad',
-                 'Cross Gym',
-                 'Hunter Gym',
-                 'Hall',
-                 'Upper Court',
-                 'Pool',
-                 'Upper Fields',
-                 'Lower Fields',
-                 ]
+LOCATION_LIST = [
+    'N/A',
+    'A block',
+    'B block',
+    'C block',
+    'D block',
+    'D Extension'
+    'E block',
+    'G block',
+    'H block',
+    'K block',
+    'Learning Centre',
+    'M block',
+    'N block',
+    'P block',
+    'R block',
+    'X block',
+    'Aurora Centre',
+    'Green Room',
+    'Library',
+    'Office/Administration block',
+    'Quad',
+    'Cross Gym',
+    'Hunter Gym',
+    'Hall',
+    'Upper Court',
+    'Pool',
+    'Upper Fields',
+    'Lower Fields',
+]
 
 # Functions
 def validate_item_data(item_type, item_colours, size, nametag, location, notes):
@@ -175,7 +175,7 @@ class LostItem(db.Model):
     '''Database table containing the lost item information'''
     __tablename__ = 'lost_item'
     item_id = db.Column(db.Integer, primary_key=True)
-    finder_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    finder_id = db.Column(db.String(6), db.ForeignKey('user.user_id'))
     item_type = db.Column(db.String(50))
     time_found = db.Column(db.String(50))
     size = db.Column(db.String(50))
@@ -368,11 +368,49 @@ def admin():
                                error_title='Forbiddon',
                                error_message='You do not have permission to access this page')
 
+    lost_and_found_query = LostItem.query.filter_by(status='LOST AND FOUND')
+    missing_items_query = LostItem.query.filter_by(status='LOOKING FOR')
+
     if request.method == 'POST':
-        pass
-    
-    lost_and_found_items = LostItem.query.filter_by(status='LOST AND FOUND').all()
-    missing_items = LostItem.query.filter_by(status='LOOKING FOR').all()
+        finder_id = request.form.get('finder_id')
+        item_type = request.form.get('item_type')
+        colours = request.form.getlist('colours[]')
+        location = request.form.get('location') or None
+        status = 'LOOKING FOR'
+
+        # Applying the filters only if the filter has been applied
+        if finder_id:
+            lost_and_found_query = lost_and_found_query.filter(
+                LostItem.finder_id == finder_id
+            )
+            missing_items_query = missing_items_query.filter(
+                LostItem.finder_id == finder_id
+            )
+        if item_type != 'None':
+            lost_and_found_query = lost_and_found_query.filter(
+                LostItem.item_type == item_type
+            )
+            missing_items_query = missing_items_query.filter(
+                LostItem.item_type == item_type
+            )
+        if colours:
+            lost_and_found_query = lost_and_found_query.filter(
+                LostItem.colours.any(Colour.name.in_(colours))
+            )
+            missing_items_query = missing_items_query.filter(
+                LostItem.colours.any(Colour.name.in_(colours))
+            )
+        if location != 'None':
+            lost_and_found_query = lost_and_found_query.filter(
+                LostItem.location == location
+            )
+            missing_items_query = missing_items_query.filter(
+                LostItem.finder_id == finder_id
+            )
+
+    lost_and_found_items = lost_and_found_query.all()
+    missing_items = missing_items_query.all()
+
 
     for item in lost_and_found_items + missing_items:
         item.colour_names = [colour.name for colour in item.colours]
@@ -548,6 +586,7 @@ def signup():
             flash('This account already exists')
             return redirect('/signup')
 
+        # sending the email
         # Initilising variables for the senders email
         sender_email = auth.sender_email
         sender_email_password = auth.sender_email_password

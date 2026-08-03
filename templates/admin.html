@@ -20,8 +20,12 @@
 
 <form method="post" action="/admin">
     <div class="upload_form">
+        <h2 class="upload_form_subtitle">School Code</h2>
+        <input class='upload_text_box' type="text" name="finder_id" maxlength="6">
+
         <h2 class="upload_form_subtitle">Item Type</h2>
         <select name="item_type" class="upload_type_dropdown">
+            <option value="None">None</option>
             <option value="BHS Beanie">BHS Beanie</option>
             <option value="BHS Blazer">BHS Blazer</option>
             <option value="BHS Cardigan">BHS Cardigan</option>
@@ -131,6 +135,38 @@
             </label>
         </fieldset>
 
+        <h2 class="upload_form_subtitle">Location:</h2>
+        <select name="location" class="upload_type_dropdown">
+            <option value="None">None</option>
+            <option value="A block">A block</option>
+            <option value="B block">B block</option>
+            <option value="C block">C block</option>
+            <option value="D block">D block</option>
+            <option value="D Extension">D Extension</option>
+            <option value="E block">E block</option>
+            <option value="G block">G block</option>
+            <option value="H block">H block</option>
+            <option value="K block">K block</option>
+            <option value="Learning Centre">Learning Centre</option>
+            <option value="M block">M block</option>
+            <option value="N block">N block</option>
+            <option value="P block">P block</option>
+            <option value="R block">R block</option>
+            <option value="X block">X block</option>
+            <option value="Aurora Centre">Aurora Centre</option>
+            <option value="Green Room">Green Room</option>
+            <option value="Library">Library</option>
+            <option value="Office/Administration block">Office/Administration block</option>
+            <option value="Quad">Quad</option>
+            <option value="Cross Gym">Cross Gym</option>
+            <option value="Hunter Gym">Hunter Gym</option>
+            <option value="Hall">Hall</option>
+            <option value="Upper Court">Upper Court</option>
+            <option value="Pool">Pool</option>
+            <option value="Upper Fields">Upper Fields</option>
+            <option value="Lower Fields">Lower Fields</option>
+        </select>
+
         <input class='upload_submit_button' type="submit" value="Filter">
     </div>
 </form>
@@ -142,7 +178,7 @@
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
       <th class="item_info_header">Item size</th>
-      <th class="item_info_header">Nametag (If any)</th>
+      <th class="item_info_header">Nametag</th>
       <th class="item_info_header">Location</th>
       <th class="item_info_header">Status</th>
       <th class="item_info_header">Colours</th>
@@ -187,7 +223,7 @@
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
       <th class="item_info_header">Item size</th>
-      <th class="item_info_header">Nametag (If any)</th>
+      <th class="item_info_header">Nametag</th>
       <th class="item_info_header">Location</th>
       <th class="item_info_header">Status</th>
       <th class="item_info_header">Colours</th>
