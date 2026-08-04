@@ -1,18 +1,36 @@
 '''This is a prject start during () and ended (). it focuses on the lost proptery system at'''
 
 # imports
-from flask import Flask, render_template, request, flash, session, redirect, abort, current_app
-from flask_session import Session
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from flask_mail import Mail, Message
-from threading import Thread
+import hashlib
+
 # email stuff
 import random
-import hashlib
-import auth
+from datetime import datetime
+from threading import Thread
 
+from flask import (
+    Flask,
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+)
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+from flask_mail import Mail, Message
+from flask_sqlalchemy import SQLAlchemy
+
+import auth
+from flask_session import Session
 
 # Constants
 ITEM_TYPE_LIST = [
@@ -235,7 +253,7 @@ login_manager.login_view = "login"
 
 @login_manager.user_loader
 def load_user(user_id):
-    '''User oader for Flask Login'''
+    '''User loader for Flask Login'''
     return User.query.get(int(user_id))
 
 
@@ -244,6 +262,24 @@ def inject_variables():
     '''This route injects these variable into every route'''
     return dict(show_footer=True,
                 logged_in = current_user.is_authenticated)
+
+
+@app.before_request
+def before_request():
+    '''
+    This route runs a check before every request to check if the account
+    is disabled or not. If it is, they cannot access anything
+    '''
+    if request.endpoint in ['logout', 'static']:
+        # User can still log out
+        return
+    
+    if current_user.is_authenticated is True:
+            if current_user.clearance == 4:
+                return render_template("error.html",
+                                        title="Forbidden",
+                                        error_title="Your account has been disabled",
+                                        error_message="Please contact an admin")
 
 
 # Beginning of Routes/Pages
@@ -266,10 +302,9 @@ def home():
 @login_required
 def upload():
     '''
-    Docstring for upload
+    Route for the upload page where a user can upload a lost item that
+    they have found
     '''
-    # any logged in user can access this page
-    
     if request.method == 'POST':
         finder_id = current_user.school_code
         item_type = request.form.get('item_type')
@@ -315,7 +350,8 @@ def upload():
 @login_required
 def find():
     '''
-    This is the page where users can submit an item that they have lost.
+    This is the page where users can submit an item that they have lost and
+    await a response from an admin who can see that their item has been found
     '''
 
     if request.method == 'POST':
@@ -361,15 +397,6 @@ def find():
                            title='Find',)
 
 
-@app.route('/about', methods=['POST', 'GET'])
-def about():
-    '''
-    Route for about page. Page contains general information about the site
-    '''
-    return render_template('about.html',
-                           title='About',)
-
-
 @app.route('/dashboard', methods=['POST', 'GET'])
 @login_required
 def dashboard():
@@ -389,15 +416,17 @@ def dashboard():
 @login_required
 def admin():
     '''An admin panel for admins'''
-    if session['clearance'] > 1:   # Clearance check, Admins only
+    if current_user.clearance > 1:   # Clearance check, Admins only
         # Users below clearance 1 cannot access this page
         return render_template('error.html',
-                               title='Access Forbidon',
-                               error_title='Forbiddon',
+                               title='Access Forbidden',
+                               error_title='Forbidden',
                                error_message='You do not have permission to access this page')
 
     lost_and_found_query = LostItem.query.filter_by(status='LOST AND FOUND')
     missing_items_query = LostItem.query.filter_by(status='LOOKING FOR')
+    returned_items_query = LostItem.query.filter_by(status='RETURNED')
+    recieved_items_query = LostItem.query.filter_by(status='RETURNED')
 
     if request.method == 'POST':
         finder_id = request.form.get('finder_id')
@@ -406,34 +435,59 @@ def admin():
         location = request.form.get('location') or None
 
         # Applying the filters only if the filter has been applied
-        if finder_id:
+        if finder_id:  # Filtering by finder_id
             lost_and_found_query = lost_and_found_query.filter(
                 LostItem.finder_id == finder_id
             )
             missing_items_query = missing_items_query.filter(
                 LostItem.finder_id == finder_id
             )
-        if item_type != 'None':
+            returned_items_query = returned_items_query.filter(
+                LostItem.finder_id == finder_id
+            )
+            recieved_items_query = recieved_items_query.filter(
+                LostItem.finder_id == finder_id
+            )
+        if item_type != 'None':  # Filtering by item type
             lost_and_found_query = lost_and_found_query.filter(
                 LostItem.item_type == item_type
             )
             missing_items_query = missing_items_query.filter(
                 LostItem.item_type == item_type
             )
-        if colours:
+            returned_items_query = returned_items_query.filter(
+                LostItem.item_type == item_type
+            )
+            recieved_items_query = recieved_items_query.filter(
+                LostItem.item_type == item_type
+            )
+        if colours:  # FIltering by colours
             lost_and_found_query = lost_and_found_query.filter(
                 LostItem.colours.any(Colour.name.in_(colours))
             )
             missing_items_query = missing_items_query.filter(
                 LostItem.colours.any(Colour.name.in_(colours))
             )
-        if location != 'None':
+            returned_items_query = returned_items_query.filter(
+                LostItem.colours.any(Colour.name.in_(colours))
+            )
+            recieved_items_query = recieved_items_query.filter(
+                LostItem.colours.any(Colour.name.in_(colours))
+            )
+        if location != 'None':  # Filtering by location
             lost_and_found_query = lost_and_found_query.filter(
                 LostItem.location == location
             )
             missing_items_query = missing_items_query.filter(
                 LostItem.finder_id == finder_id
             )
+            returned_items_query = returned_items_query.filter(
+                LostItem.finder_id == finder_id
+            )
+            recieved_items_query = recieved_items_query.filter(
+                LostItem.finder_id == finder_id
+            )
+            
 
     lost_and_found_items = lost_and_found_query.all()
     missing_items = missing_items_query.all()
@@ -447,14 +501,80 @@ def admin():
                            missing_items=missing_items)
 
 
+@app.route('/match')
+@login_required
+def match():
+    '''
+    Route that allows admins to press a button to match lost items with
+    found items. This will send a notification to the person with the lost item
+    '''
+
+
 @app.route('/account_manager')
 @login_required
 def account_manager():
-    '''Route that only admins can access and can manage all accounts'''
+    '''
+    Route that only admins can access and can manage all accounts.
+    They will have the ability to promote and demote accounts
+    '''
+    if current_user.clearance > 1:   # Clearance check, Admins only
+            # Users below clearance 1 cannot access this page
+            return render_template('error.html',
+                                   title='Access Forbidden',
+                                   error_title='Forbiddon',
+                                   error_message='You do not have permission to access this page')
     users = User.query.all()
     return render_template('account_manager.html',
                            title='Account Manager',
                            users=users)
+
+
+@app.route('/promote/<int:user_id>')
+@login_required
+def promote(user_id):
+    '''Route that can be used to promote someones clearance, admins only'''
+    if current_user.clearance > 1:   # Clearance check, Admins only
+            # Users below clearance 1 cannot access this page
+            return render_template('error.html',
+                                   title='Access Forbidden',
+                                   error_title='Forbiddon',
+                                   error_message='You do not have permission to access this page')
+
+    account = User.query.filter_by(user_id=user_id).first_or_404()
+
+    # Making sure admins can't be promote
+    if account.clearance <= 1:
+        flash('Admins cannot be promoted')
+        return redirect('/account_manager')
+    else:
+        account.clearance -= 1
+        db.session.commit()
+        flash('User successfully promote')
+        return redirect('/account_manager')
+
+
+@app.route('/demote/<int:user_id>')
+@login_required
+def demote(user_id):
+    '''Route that can be used to promote someones clearance, admins only'''
+    if current_user.clearance > 1:   # Clearance check, Admins only
+            # Users below clearance 1 cannot access this page
+            return render_template('error.html',
+                                   title='Access Forbidden',
+                                   error_title='Forbiddon',
+                                   error_message='You do not have permission to access this page')
+
+    account = User.query.filter_by(user_id=user_id).first_or_404()
+
+    # Making sure disabled accounts can't be demoted
+    if account.clearance >= 4:
+        flash('Admins cannot be promoted')
+        return redirect('/account_manager')
+    else:
+        account.clearance += 1
+        db.session.commit()
+        flash('User successfully demoted')
+        return redirect('/account_manager')
 
 
 @app.route('/item/<int:item_id>', methods=['GET', 'POST'])
@@ -462,7 +582,7 @@ def account_manager():
 def item(item_id):
     item = LostItem.query.get_or_404(item_id)
 
-    if session['clearance'] > 1:   # Clearance check, Admin or Finder only
+    if current_user.clearance > 1:   # Clearance check, Admin or Finder only
     # If the user isnt an admin, they need to be the finder of the item
         if current_user.school_code != str(item.finder_id):
             print('aborted')
@@ -510,17 +630,18 @@ def item(item_id):
 @app.route('/item/<int:item_id>/delete', methods=['POST', 'GET'])
 @login_required
 def delete(item_id):
+    
     item = LostItem.query.get_or_404(item_id)
     print('test')
     print(item)
-    if session['clearance'] > 1:   # Clearance check
+    if current_user.clearance > 1:   # Clearance check
     # If the user isnt an admin, they need to be the finder of the item
         if current_user.school_code != item.finder_id:
             abort(404)
     db.session.delete(item)
     db.session.commit()
     flash('Item deleted successfully')
-    return redirect('/admin')
+    return redirect('/dashboard')
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -552,7 +673,6 @@ def login():
             login_user(account)
             flash('Successful login, welcome')
             session['clearance'] = account.clearance
-            print(session['clearance'])
             return redirect('/dashboard')
         else:
             flash('Incorrect password, please try again')
@@ -807,6 +927,15 @@ def delete_account():
     return render_template('delete_account.html', title='Delete Account')
 
 
+@app.route('/about', methods=['POST', 'GET'])
+def about():
+    '''
+    Route for about page. Page contains general information about the site
+    '''
+    return render_template('about.html',
+                           title='About',)
+
+
 @app.route('/logout')
 def logout():
     '''This route logs out the user and redirects them to the home page'''
@@ -822,6 +951,7 @@ def page_not_found(e):
     '''
     Custom 404 page not found page
     '''
+    print(e)
     return render_template("error.html",
                            title="Page Not Found",
                            error_title="Oops, you must be lost",
