@@ -1,0 +1,47 @@
+{% extends "layout.html" %} 
+{% block content %}
+
+<h1 class="title">
+    Account Manager
+</h1>
+
+<!-- Flash messages start -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class=flashes>
+      {% for message in messages %}
+        <div>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<table class="item_info_table">
+  <h2 class="sub_heading">All active accounts</h2>
+    <tr>
+      <th class="item_info_header">User ID</th>
+      <th class="item_info_header">First name</th>
+      <th class="item_info_header">Last name</th>
+      <th class="item_info_header">School code</th>
+      <th class="item_info_header">Clearance</th>
+      <th class="item_info_header">Action</th>
+    </tr> 
+    {% for user in users %}
+    <tr class="item_info_row">
+      <th>{{user.user_id}}</th>
+      <td>{{user.first_name}}</td>
+      <td>{{user.last_name}}</td>
+      <td>{{user.school_code}}</td>
+      <td>
+        {% if user.clearance == 1 %}
+            Admin
+        {% endif %}
+      </td>
+      <td class="edit_item_button"><a href="/home">Edit</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

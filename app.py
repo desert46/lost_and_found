@@ -1,12 +1,13 @@
 '''This is a prject start during () and ended (). it focuses on the lost proptery system at'''
 
 # imports
-from flask import Flask, render_template, request, flash, session, redirect, abort
+from flask import Flask, render_template, request, flash, session, redirect, abort, current_app
 from flask_session import Session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_mail import Mail, Message
+from threading import Thread
 # email stuff
 import random
 import hashlib
@@ -139,6 +140,23 @@ def validate_item_data(item_type, item_colours, size, nametag, location, notes):
         return False, 'Please provide valid lengths for your inputs'
     
     return True, None
+
+
+def send_confirmation_email(app, recipient, confirmation_code):
+    '''Function for sending the confirmation email'''
+    with app.app_context():
+        message = Message(
+            subject="Lost and Found BHS Confirmation Code",
+            recipients=[recipient]
+        )
+
+        message.body = (
+            f"Kia ora,\n\n"
+            f"Here is your confirmation code: {confirmation_code}\n\n"
+            f"If you did not request to create an account, you can ignore this email."
+        )
+        mail.send(message)
+
 
 # flask session stuff
 app = Flask(__name__)
@@ -370,6 +388,7 @@ def dashboard():
 @app.route('/admin', methods=['POST', 'GET'])
 @login_required
 def admin():
+    '''An admin panel for admins'''
     if session['clearance'] > 1:   # Clearance check, Admins only
         # Users below clearance 1 cannot access this page
         return render_template('error.html',
@@ -385,7 +404,6 @@ def admin():
         item_type = request.form.get('item_type')
         colours = request.form.getlist('colours[]')
         location = request.form.get('location') or None
-        status = 'LOOKING FOR'
 
         # Applying the filters only if the filter has been applied
         if finder_id:
@@ -427,6 +445,16 @@ def admin():
     return render_template('admin.html', title='Admin',
                            lost_and_found_items=lost_and_found_items,
                            missing_items=missing_items)
+
+
+@app.route('/account_manager')
+@login_required
+def account_manager():
+    '''Route that only admins can access and can manage all accounts'''
+    users = User.query.all()
+    return render_template('account_manager.html',
+                           title='Account Manager',
+                           users=users)
 
 
 @app.route('/item/<int:item_id>', methods=['GET', 'POST'])
@@ -605,24 +633,17 @@ def signup():
         correct_number = random.randint(100000, 999999)
         session['correct_number'] = correct_number
 
-        # Send confirmation email
-        recipient = f"{school_code}{auth.domain_name}"
-
-        message = Message(
-            subject="Lost and Found BHS Confirmation Code",
-            recipients=[recipient]
-        )
-        # Creating the message inside the email
-        message.body = (
-            f"Kia ora,\n\n"
-            f"Here is your confirmation code: {correct_number}\n\n"
-            f"If you did not request to create an account with us, you can ignore this email."
-        )
-
         try:
-            mail.send(message)
+            recipient = f"{school_code}{auth.domain_name}"
+            # Sending the email in the background so redirect can occur immediatly
+            Thread(
+                target=send_confirmation_email,
+                args=(app, recipient, correct_number),
+                daemon=True
+            ).start()
             print(f"Email sent successfully to {recipient}")
         except Exception as e:
+            # Captures the error pessage and prints it in terminal
             print(f"Failed to send email: {e}")
             flash("An error occured, please try again later.")
             return redirect('/signup')
@@ -657,7 +678,7 @@ def confirm():
             return redirect('/confirm')
         print(confirmation_number)
 
-        if int(confirmation_number )== correct_number:
+        if int(confirmation_number) == correct_number:
             # Successful account creation
             # Hashing the password
             h = hashlib.new('SHA256')
