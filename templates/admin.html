@@ -174,6 +174,7 @@
 <table class="item_info_table">
   <h2 class="sub_heading">Lost and Found items</h2>
     <tr>
+      <th class="item_info_header">Item ID</th>
       <th class="item_info_header">Finder's code</th>
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
@@ -187,6 +188,7 @@
     </tr> 
     {% for item in lost_and_found_items %}
     <tr class="item_info_row">
+      <td>{{item.item_id}}</td>
       <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>
       <!-- formatting date and time into a more readable format -->
@@ -219,6 +221,7 @@
 <table class="item_info_table">
     <h2 class="sub_heading">Missing items</h2>
     <tr>
+      <th class="item_info_header">Item ID</th>
       <th class="item_info_header">Finder's code</th>
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
@@ -232,6 +235,7 @@
     </tr> 
     {% for item in missing_items %}
     <tr class="item_info_row">
+      <td>{{item.item_id}}</td>
       <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>
       <!-- formatting date and time into a more readable format -->
@@ -258,6 +262,8 @@
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
         <a href="/item/{{item.item_id}}/delete">Delete</a>
+          <br>
+        <a href="/item/{{item.item_id}}/match">Match</a>
       </td>
     </tr>
     {% endfor %}

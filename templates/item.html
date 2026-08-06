@@ -70,6 +70,7 @@
 
 <form method="post" action="/item/{{item.item_id}}">
     <div class="upload_form">
+        <h1>Edit Item</h1>
         <h2 class="upload_form_subtitle">Item Type:</h2>
         <select name="item_type" class="upload_type_dropdown">
             <option value="BHS Beanie" {% if item.item_type == 'BHS Beanie' %}selected{% endif %}>BHS Beanie</option>
@@ -186,7 +187,7 @@
 
         <h2 class="upload_form_subtitle">Time found:</h2>
         <p> e.g. 06/07/2026, 01:50 PM</p>
-        <input class='upload_datetime' type="datetime-local" name="time_found" value="{{item.time_found}}">
+        <input class='upload_datetime' type="datetime-local" name="time_found" value="{{item.time_found}}" min="{{min_time}}" max="{{current_time}}">
 
         <h2 class="upload_form_subtitle">Size:</h2>
         <input class='upload_text_box' type="text" name="size" maxlength="10" value="{{item.size}}">

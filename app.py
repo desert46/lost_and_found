@@ -106,7 +106,7 @@ LOCATION_LIST = [
     'B block',
     'C block',
     'D block',
-    'D Extension'
+    'D Extension',
     'E block',
     'G block',
     'H block',
@@ -132,7 +132,13 @@ LOCATION_LIST = [
 ]
 
 # Functions
-def validate_item_data(item_type, item_colours, size, nametag, location, notes):
+def validate_item_data(item_type,
+                       item_colours,
+                       time_found,
+                       size,
+                       nametag,
+                       location,
+                       notes):
     '''
     Function to validate item changes so they align with certain parameters
     Inputs: item_type, item_colours, size, nametag, notes
@@ -144,6 +150,16 @@ def validate_item_data(item_type, item_colours, size, nametag, location, notes):
     for colour in item_colours:
         if colour not in COLOUR_LIST:
             return False, 'Please provide valid colours'
+
+    try:
+        # formatting the time format so it can be compared properly
+        time_found_formatted = datetime.strptime(time_found, "%Y-%m-%dT%H:%M")
+        print(time_found_formatted)
+    except:
+        return False, "Please provide a valid date and time."
+
+    if time_found_formatted > datetime.now():
+        return False, "The date and time cannot be in the future."
 
     if location not in LOCATION_LIST:
         return False, 'Please provide a valid location'
@@ -171,7 +187,7 @@ def send_confirmation_email(app, recipient, confirmation_code):
         message.body = (
             f"Kia ora,\n\n"
             f"Here is your confirmation code: {confirmation_code}\n\n"
-            f"If you did not request to create an account, you can ignore this email."
+            f"If you did not request to create this account, you can ignore this email."
         )
         mail.send(message)
 
@@ -261,7 +277,10 @@ def load_user(user_id):
 def inject_variables():
     '''This route injects these variable into every route'''
     return dict(show_footer=True,
-                logged_in = current_user.is_authenticated)
+                logged_in = current_user.is_authenticated,
+                min_time = "2026-01-01T00:00",
+                current_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
+                )
 
 
 @app.before_request
@@ -274,12 +293,11 @@ def before_request():
         # User can still log out
         return
     
-    if current_user.is_authenticated is True:
-            if current_user.clearance == 4:
-                return render_template("error.html",
-                                        title="Forbidden",
-                                        error_title="Your account has been disabled",
-                                        error_message="Please contact an admin")
+    if current_user.is_authenticated is True and current_user.clearance == 4:
+        return render_template("error.html",
+                                    title="Forbidden",
+                                    error_title="Your account has been disabled",
+                                    error_message="Please contact an admin")
 
 
 # Beginning of Routes/Pages
@@ -317,7 +335,7 @@ def upload():
         notes = request.form.get('notes') or None
 
         # backend data check for item data
-        is_valid, error_message = validate_item_data(item_type, item_colours, size, nametag, location, notes)
+        is_valid, error_message = validate_item_data(item_type, item_colours, time_found, size, nametag, location, notes)
         if not is_valid:
             flash(error_message)
             return redirect('/upload')
@@ -366,7 +384,7 @@ def find():
         notes = request.form.get('notes') or None
 
         # backend data check for item data
-        is_valid, error_message = validate_item_data(item_type, item_colours, size, nametag, location, notes)
+        is_valid, error_message = validate_item_data(item_type, item_colours, time_missing, size, nametag, location, notes)
         if not is_valid:
             flash(error_message)
             return redirect('/find')
@@ -508,6 +526,7 @@ def match():
     Route that allows admins to press a button to match lost items with
     found items. This will send a notification to the person with the lost item
     '''
+    pass
 
 
 @app.route('/account_manager')
@@ -605,6 +624,7 @@ def item(item_id):
         # backend data check for item data
         is_valid, error_message = validate_item_data(item.item_type,
                                                      item_colours,
+                                                     item.time_found,
                                                      item.size,
                                                      item.nametag,
                                                      item.location,
