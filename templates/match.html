@@ -2,7 +2,7 @@
 {% block content %}
 
 <h1 class="title">
-    Admin Panel
+    Match
 </h1>
 
 <!-- Flash messages start -->
@@ -18,9 +18,9 @@
   {% endif %}
 {% endwith %}
 
-<form method="post" action="/admin">
+<form method="post" action="/item/{{item_id}}/match">
     <div class="upload_form">
-      <h1>Filter</h1>
+        <h1>Filter</h1>
         <h2 class="upload_form_subtitle">School Code</h2>
         <input class='upload_text_box' type="text" name="finder_id" maxlength="6">
 
@@ -173,7 +173,55 @@
 </form>
 
 <table class="item_info_table">
-  <h2 class="sub_heading">Lost and Found items</h2>
+    <h2 class="sub_heading">Current Missing Item</h2>
+    <tr>
+      <th class="item_info_header">Item ID</th>
+      <th class="item_info_header">Finder's code</th>
+      <th class="item_info_header">Item type</th>
+      <th class="item_info_header">Time found</th>
+      <th class="item_info_header">Item size</th>
+      <th class="item_info_header">Nametag</th>
+      <th class="item_info_header">Location</th>
+      <th class="item_info_header">Status</th>
+      <th class="item_info_header">Colours</th>
+      <th class="item_info_header">Notes</th>
+      <th class="item_info_header">Action</th>
+    </tr> 
+
+    <tr class="item_info_row">
+      <td>{{current_item.item_id}}</td>
+      <td>{{current_item.finder_id}}</td>
+      <td>{{current_item.item_type}}</td>
+      <!-- formatting date and time into a more readable format -->
+      <td>
+        {% if current_item.time_found is not none %}
+          ({{ current_item.time_found[11:16] }})<br>{{ current_item.time_found[8:10] }}/{{ current_item.time_found[5:7] }}/{{ current_item.time_found[0:4] }}
+        {% else %}
+          {{current_item.time_found}}
+        {% endif %}
+      </td>
+      <td>{{current_item.size}}</td>
+      <td>{{current_item.nametag}}</td>
+      <td>{{current_item.location}}</td>
+      <td>{{current_item.status}}</td>
+      <td>
+        {% if colour_names %}
+            {% for colour in colour_names %}
+              {{ colour }},
+            {% endfor %}
+        {% else %}
+          None
+        {% endif %}
+      </td>
+      <td>{{current_item.notes}}</td>
+      <td>
+        <a href="/request_info/{{current_item.item_id}}">Request info</a>
+      </td>
+    </tr>
+</table>
+
+<table class="item_info_table">
+  <h2 class="sub_heading">Current Lost and Found items</h2>
     <tr>
       <th class="item_info_header">Item ID</th>
       <th class="item_info_header">Finder's code</th>
@@ -214,58 +262,11 @@
         {% endif %}
       </td>
       <td>{{item.notes}}</td>
-      <td class="edit_item_button"><a href="/item/{{item.item_id}}">Edit</a></td>
-    </tr>
-    {% endfor %}
-</table>
-
-<table class="item_info_table">
-    <h2 class="sub_heading">Missing items</h2>
-    <tr>
-      <th class="item_info_header">Item ID</th>
-      <th class="item_info_header">Finder's code</th>
-      <th class="item_info_header">Item type</th>
-      <th class="item_info_header">Time found</th>
-      <th class="item_info_header">Item size</th>
-      <th class="item_info_header">Nametag</th>
-      <th class="item_info_header">Location</th>
-      <th class="item_info_header">Status</th>
-      <th class="item_info_header">Colours</th>
-      <th class="item_info_header">Notes</th>
-      <th class="item_info_header">Action</th>
-    </tr> 
-    {% for item in missing_items %}
-    <tr class="item_info_row">
-      <td>{{item.item_id}}</td>
-      <td>{{item.finder_id}}</td>
-      <td>{{item.item_type}}</td>
-      <!-- formatting date and time into a more readable format -->
-      <td>
-        {% if item.time_found is not none %}
-          ({{ item.time_found[11:16] }})<br>{{ item.time_found[8:10] }}/{{ item.time_found[5:7] }}/{{ item.time_found[0:4] }}
-        {% else %}
-          {{item.time_found}}
-        {% endif %}
-      </td>
-      <td>{{item.size}}</td>
-      <td>{{item.nametag}}</td>
-      <td>{{item.location}}</td>
-      <td>{{item.status}}</td>
-      <td>
-        {% if colour_names %}
-            {% for colour in colour_names %}
-              {{ colour }},
-            {% endfor %}
-        {% else %}
-          None
-        {% endif %}
-      </td>
-      <td>{{item.notes}}</td>
       <td class="edit_item_button">
-        <a href="/item/{{item.item_id}}/delete">Delete</a>
-          <br>
-        <a href="/item/{{item.item_id}}/match">Match</a>
+        <a href="/return_item/{{item_id}}/{{item.item_id}}">Return</a>
       </td>
+      
+
     </tr>
     {% endfor %}
 </table>

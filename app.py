@@ -1,17 +1,19 @@
-'''This is a prject start during () and ended (). it focuses on the lost proptery system at'''
+'''
+This is a project start during 18/04/2026 and ended xx/08/2026.
+This project focuses on the lost proptery system at BHS.
+The goal of this project is to digitise the current lost property system.
+'''
 
 # imports
 import hashlib
-
-# email stuff
 import random
 from datetime import datetime
 from threading import Thread
 
+# Flask stuff
 from flask import (
     Flask,
     abort,
-    current_app,
     flash,
     redirect,
     render_template,
@@ -151,15 +153,16 @@ def validate_item_data(item_type,
         if colour not in COLOUR_LIST:
             return False, 'Please provide valid colours'
 
-    try:
-        # formatting the time format so it can be compared properly
-        time_found_formatted = datetime.strptime(time_found, "%Y-%m-%dT%H:%M")
-        print(time_found_formatted)
-    except:
-        return False, "Please provide a valid date and time."
+    if time_found is not None:
+        try:
+            # formatting the time format so it can be compared properly
+            time_found_formatted = datetime.strptime(time_found, "%Y-%m-%dT%H:%M")
+            print(time_found_formatted)
+        except:
+            return False, "Please provide a valid date and time."
 
-    if time_found_formatted > datetime.now():
-        return False, "The date and time cannot be in the future."
+        if time_found_formatted > datetime.now():
+            return False, "The date and time cannot be in the future."
 
     if location not in LOCATION_LIST:
         return False, 'Please provide a valid location'
@@ -180,7 +183,7 @@ def send_confirmation_email(app, recipient, confirmation_code):
     '''Function for sending the confirmation email'''
     with app.app_context():
         message = Message(
-            subject="Lost and Found BHS Confirmation Code",
+            subject="[Lost and Found BHS] Confirmation Code",
             recipients=[recipient]
         )
 
@@ -188,6 +191,38 @@ def send_confirmation_email(app, recipient, confirmation_code):
             f"Kia ora,\n\n"
             f"Here is your confirmation code: {confirmation_code}\n\n"
             f"If you did not request to create this account, you can ignore this email."
+        )
+        mail.send(message)
+
+
+def send_match_email(app, recipient, item_type):
+    '''Function for sending the match item email'''
+    with app.app_context():
+        message = Message(
+            subject="[Lost and Found BHS] Your item has been found",
+            recipients=[recipient]
+        )
+
+        message.body = (
+            f"Kia ora,\n\n"
+            f"Your {item_type} has been found\n\n"
+            f"Please visit the student office to pick up your item"
+        )
+        mail.send(message)
+
+
+def send_more_info_email(app, recipient, item_type):
+    '''Function for sending the more info needed email'''
+    with app.app_context():
+        message = Message(
+            subject="[Lost and Found BHS] Requesting more information",
+            recipients=[recipient]
+        )
+
+        message.body = (
+            f"Kia ora,\n\n"
+            f"Your {item_type} needs more information in order to be returned to you\n\n"
+            f"Please update your note on the item or visit the student office"
         )
         mail.send(message)
 
@@ -204,7 +239,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///lost_and_found.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
-# Setting up email stuff
+# Email set up
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -290,7 +325,7 @@ def before_request():
     is disabled or not. If it is, they cannot access anything
     '''
     if request.endpoint in ['logout', 'static']:
-        # User can still log out
+        # User can still log out but is still denied from each route
         return
     
     if current_user.is_authenticated is True and current_user.clearance == 4:
@@ -519,14 +554,123 @@ def admin():
                            missing_items=missing_items)
 
 
-@app.route('/match')
+@app.route('/item/<int:item_id>/match', methods=['POST', 'GET'])
 @login_required
-def match():
+def match(item_id):
     '''
     Route that allows admins to press a button to match lost items with
+    found items. This will send them to a page where they can check it against all of
+    current lost and found items and then return them to the student
+    '''
+    if current_user.clearance > 1:   # Clearance check, Admins only
+            # Users below clearance 1 cannot access this page
+            return render_template('error.html',
+                                   title='Access Forbidden',
+                                   error_title='Forbidden',
+                                   error_message='You do not have permission to access this page')
+    
+    current_item = LostItem.query.filter_by(item_id=item_id).first_or_404()
+    if current_item.status != 'LOOKING FOR':
+        abort(404)
+    lost_and_found_items = LostItem.query.filter_by(status='LOST AND FOUND').all()
+    return render_template('match.html',
+                           title='Match',
+                           current_item=current_item,
+                           lost_and_found_items=lost_and_found_items,
+                           item_id=item_id)
+
+
+@app.route('/return_item/<int:looking_for_item_id>/<int:item_match_id>', methods=['POST', 'GET'])
+@login_required
+def return_item(looking_for_item_id, item_match_id):
+    '''
+    Route that allows admins to press a button to return lost items with
     found items. This will send a notification to the person with the lost item
     '''
-    pass
+    if current_user.clearance > 1:   # Clearance check, Admins only
+            # Users below clearance 1 cannot access this page
+            return render_template('error.html',
+                                   title='Access Forbidden',
+                                   error_title='Forbidden',
+                                   error_message='You do not have permission to access this page')
+
+    looking_for_item = LostItem.query.filter_by(item_id=looking_for_item_id).first_or_404()
+    print(2)
+    current_lost_item = LostItem.query.filter_by(item_id=item_match_id).first_or_404()
+    print(current_lost_item.status)
+    if current_lost_item.status != 'LOST AND FOUND':
+        abort(404)
+        print('3')
+
+    if looking_for_item.status != 'LOOKING FOR':
+        abort(404)
+        print('4')
+    looking_for_item.status = 'FOUND'
+    current_lost_item.status = 'RETURNED'
+    db.session.commit()
+
+    # sending email
+    recipient_school_code = looking_for_item.finder_id
+    recipient_item_type = looking_for_item.item_type
+    print(5)
+    try:
+        recipient = f"{recipient_school_code}{auth.domain_name}"
+        # Sending the email in the background so redirect can occur immediatly
+        Thread(
+            target=send_match_email,
+            args=(app, recipient, recipient_item_type),
+            daemon=True
+        ).start()
+        print(f"Email sent successfully to {recipient}")
+        flash(f'Email sent successfully to {recipient}')
+    except Exception as e:
+        # Captures the error pessage and prints it in terminal
+        print(f"Failed to send email: {e}")
+        flash("An error occured, please try again later.")
+        return redirect('/admin')
+
+    flash('Item successfully paired')
+    return redirect('/admin')
+
+
+@app.route('/request_info/<int:item_id>')
+@login_required
+def request_info(item_id):
+    '''A route that allows admins to request more info about an item'''
+    if current_user.clearance > 1:   # Clearance check, Admins only
+            # Users below clearance 1 cannot access this page
+            return render_template('error.html',
+                                   title='Access Forbidden',
+                                   error_title='Forbidden',
+                                   error_message='You do not have permission to access this page')
+
+
+    looking_for_item = LostItem.query.filter_by(item_id=item_id).first_or_404()
+
+    if looking_for_item.status != 'LOOKING FOR':
+        abort(404)
+    # sending email
+    school_code = looking_for_item.finder_id
+    item_type = looking_for_item.item_type
+
+    try:
+        print('Sending email')
+        recipient = f"{school_code}{auth.domain_name}"
+        # Sending the email in the background so redirect can occur immediatly
+        Thread(
+            target=send_more_info_email,
+            args=(app, recipient, item_type),
+            daemon=True
+        ).start()
+        flash(f'Email sent succerssfully to {recipient}')
+        print(f"Email sent successfully to {recipient}")
+    except Exception as e:
+        # Captures the error pessage and prints it in terminal
+        print(f"Failed to send email: {e}")
+        flash("An error occured, please try again later.")
+        return redirect('/dashboard')
+        
+    return redirect('/admin')
 
 
 @app.route('/account_manager')
