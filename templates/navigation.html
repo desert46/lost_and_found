@@ -1,17 +1,27 @@
 <div class="navigation_bar">
+    <a href="/home">
+            <img src="/static/images/Burnside Logo - Secondary Horizontal stacked - white RGB.png" alt="Burnside Logo" class="burnside_logo">
+    </a>
     <div class="navigation_links">
+
         <a href="/home">Home</a>
+        {% if current_user_clearance %}
+            {% if current_user_clearance <=1 %}
+            <a href="/admin">Admin</a>
+            <a href="/account_manager">Manage</a>
+            {% endif %}
+        {% endif %}
         <a href="/find">Find</a>
-        <a href="/admin">Admin(Remove later)</a>
+        
         <a href="/upload">Upload</a>
         <a href="/about">About</a>
     </div>
     {% if logged_in %}
     <div class="navigation_buttons">
         <div class="signlog">
-            <a href="logout">Log Out</a>
+            <a href="/logout">Log Out</a>
         </div>
-        <a class="settings_button" href="settings">
+        <a class="settings_button" href="/settings">
             <img src="/static/images/settings_button.png" alt="Settings">
         </a>
     </div>

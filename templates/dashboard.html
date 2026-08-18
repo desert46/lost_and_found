@@ -23,20 +23,19 @@
   <h2 class="sub_heading">Items you are looking for</h2>
     <tr>
       <th class="item_info_header">Item ID</th>
-      <th class="item_info_header">Finder's code</th>
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
       <th class="item_info_header">Item size</th>
       <th class="item_info_header">Nametag</th>
       <th class="item_info_header">Location</th>
       <th class="item_info_header">Status</th>
+      <th class="item_info_header">Colours</th>
       <th class="item_info_header">Notes</th>
       <th class="item_info_header">Action</th>
     </tr> 
     {% for item in lost_items %}
     <tr class="item_info_row">
       <th>{{item.item_id}}</th>
-      <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>
       <!-- formatting date and time into a more readable format -->
       <td>
@@ -50,8 +49,17 @@
       <td>{{item.nametag}}</td>
       <td>{{item.location}}</td>
       <td>{{item.status}}</td>
+      <td>
+        {% if item.colour_names %}
+            {% for colour in item.colour_names %}
+              {{ colour }},
+            {% endfor %}
+        {% else %}
+          None
+        {% endif %}
+      </td>
       <td>{{item.notes}}</td>
-      <td class="edit_item_button"><a href="/item/{{item.item_id}}">Edit</a></td>
+      <td class="edit_item_button"><a class='edit_button' href="/item/{{item.item_id}}">Edit</a></td>
     </tr>
     {% endfor %}
 </table>
@@ -60,20 +68,19 @@
   <h2 class="sub_heading">Items you have found</h2>
     <tr>
       <th class="item_info_header">Item ID</th>
-      <th class="item_info_header">Finder's code</th>
       <th class="item_info_header">Item type</th>
       <th class="item_info_header">Time found</th>
       <th class="item_info_header">Item size</th>
       <th class="item_info_header">Nametag</th>
       <th class="item_info_header">Location</th>
       <th class="item_info_header">Status</th>
+      <th class="item_info_header">Colours</th>
       <th class="item_info_header">Notes</th>
 
     </tr> 
     {% for item in lost_and_found_items %}
     <tr class="item_info_row">
       <th>{{item.item_id}}</th>
-      <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>
       <!-- formatting date and time into a more readable format -->
       <td>
@@ -87,6 +94,15 @@
       <td>{{item.nametag}}</td>
       <td>{{item.location}}</td>
       <td>{{item.status}}</td>
+      <td>
+        {% if item.colour_names %}
+            {% for colour in item.colour_names %}
+              {{ colour }},
+            {% endfor %}
+        {% else %}
+          None
+        {% endif %}
+      </td>
       <td>{{item.notes}}</td>
     </tr>
     {% endfor %}

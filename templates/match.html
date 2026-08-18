@@ -18,160 +18,6 @@
   {% endif %}
 {% endwith %}
 
-<form method="post" action="/item/{{item_id}}/match">
-    <div class="upload_form">
-        <h1>Filter</h1>
-        <h2 class="upload_form_subtitle">School Code</h2>
-        <input class='upload_text_box' type="text" name="finder_id" maxlength="6">
-
-        <h2 class="upload_form_subtitle">Item Type</h2>
-        <select name="item_type" class="upload_type_dropdown">
-            <option value="None">None</option>
-            <option value="BHS Beanie">BHS Beanie</option>
-            <option value="BHS Blazer">BHS Blazer</option>
-            <option value="BHS Cardigan">BHS Cardigan</option>
-            <option value="BHS Jacket">BHS Jacket</option>
-            <option value="BHS Lavalava">BHS Lavalava</option>
-            <option value="BHS Long-sleeved shirt">BHS Long-sleeved shirt</option>
-            <option value="BHS PE Shorts">BHS PE Shorts</option>
-            <option value="BHS PE Top">BHS PE Top</option>
-            <option value="BHS Scarf">BHS Scarf</option>
-            <option value="BHS Short-sleeved shirt">BHS Short-sleeved shirt</option>
-            <option value="BHS Shorts">BHS Shorts</option>
-            <option value="BHS Skirt">BHS Skirt</option>
-            <option value="BHS Sleveless vest">BHS Sleveless vest</option>
-            <option value="BHS Socks">BHS Socks</option>
-            <option value="BHS Tie">BHS Tie</option>
-            <option value="BHS Tights">BHS Tights</option>
-            <option value="BHS Tracksuit">BHS Tracksuit</option>
-            <option value="BHS Trousers">BHS Trousers</option>
-            <option value="BHS V-necked jersey">BHS V-necked jersey</option>
-            <option value="Blazer">Blazer</option>
-            <option value="Cap">Cap</option>
-            <option value="Cardigan">Cardigan</option>
-            <option value="Coat">Coat</option>
-            <option value="Dress">Dress</option>
-            <option value="Hair tie">Hair tie</option>
-            <option value="Hat">Hat</option>
-            <option value="Hoodie">Hoodie</option>
-            <option value="Jacket">Jacket</option>
-            <option value="Jandals">Jandals</option>
-            <option value="Jeans">Jeans</option>
-            <option value="Jersey">Jersey</option>
-            <option value="Long Skirt">Long Skirt</option>
-            <option value="Long-sleeved Shirt">Long-sleeved Shirt</option>
-            <option value="Pants">Pants</option>
-            <option value="Scarf">Scarf</option>
-            <option value="Shirt">Shirt</option>
-            <option value="Shorts">Shorts</option>
-            <option value="Skirt">Skirt</option>
-            <option value="Socks">Socks</option>
-            <option value="T-Shirt">T-Shirt</option>
-            <option value="Tank top">Tank top</option>
-            <option value="Tie">Tie</option>
-            <option value="Tights">Tights</option>
-        </select>
-
-        <h2 class="upload_form_subtitle">Colour</h2>
-        <fieldset class='upload_colour_selection'>
-            <label>
-                <input type="checkbox" name="colours[]" value="BHS Uniform"> BHS Uniform
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Red"> Red
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Orange"> Orange
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Yellow"> Yellow
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Light Green"> Light Green
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Dark Green"> Dark Green
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Light Blue"> Light Blue
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Dark Blue"> Dark Blue
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Navy Blue"> Navy Blue
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Purple"> Purple
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Pink"> Pink
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Light Brown/Tan"> Light Brown/Tan
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Dark Brown"> Dark Brown
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="White"> White
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Light Grey"> Light Grey
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Dark Grey"> Dark Grey
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Black"> Black
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Cream"> Cream
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Gold"> Gold
-            </label>
-            <label>
-                <input type="checkbox" name="colours[]" value="Silver"> Silver
-            </label>
-        </fieldset>
-
-        <h2 class="upload_form_subtitle">Location:</h2>
-        <select name="location" class="upload_type_dropdown">
-            <option value="None">None</option>
-            <option value="A block">A block</option>
-            <option value="B block">B block</option>
-            <option value="C block">C block</option>
-            <option value="D block">D block</option>
-            <option value="D Extension">D Extension</option>
-            <option value="E block">E block</option>
-            <option value="G block">G block</option>
-            <option value="H block">H block</option>
-            <option value="K block">K block</option>
-            <option value="Learning Centre">Learning Centre</option>
-            <option value="M block">M block</option>
-            <option value="N block">N block</option>
-            <option value="P block">P block</option>
-            <option value="R block">R block</option>
-            <option value="X block">X block</option>
-            <option value="Aurora Centre">Aurora Centre</option>
-            <option value="Green Room">Green Room</option>
-            <option value="Library">Library</option>
-            <option value="Office/Administration block">Office/Administration block</option>
-            <option value="Quad">Quad</option>
-            <option value="Cross Gym">Cross Gym</option>
-            <option value="Hunter Gym">Hunter Gym</option>
-            <option value="Hall">Hall</option>
-            <option value="Upper Court">Upper Court</option>
-            <option value="Pool">Pool</option>
-            <option value="Upper Fields">Upper Fields</option>
-            <option value="Lower Fields">Lower Fields</option>
-        </select>
-
-        <input class='upload_submit_button' type="submit" value="Filter">
-    </div>
-</form>
-
 <table class="item_info_table">
     <h2 class="sub_heading">Current Missing Item</h2>
     <tr>
@@ -214,8 +60,8 @@
         {% endif %}
       </td>
       <td>{{current_item.notes}}</td>
-      <td>
-        <a href="/request_info/{{current_item.item_id}}">Request info</a>
+      <td class="edit_item_button">
+        <a class="edit_button" href="/request_info/{{current_item.item_id}}">Request info</a>
       </td>
     </tr>
 </table>
@@ -263,7 +109,7 @@
       </td>
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
-        <a href="/return_item/{{item_id}}/{{item.item_id}}">Return</a>
+        <a class="match_button" href="/return_item/{{item_id}}/{{item.item_id}}">Return</a>
       </td>
       
 

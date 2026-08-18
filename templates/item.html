@@ -59,14 +59,10 @@
       </td>
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
-        <a href="/item/{{item.item_id}}/delete">Delete</a>
+        <a class="delete_button" href="/item/{{item.item_id}}/delete">Delete</a>
       </td>
     </tr>
 </table>
-
-<div class="match_button">
-    test
-</div>
 
 <form method="post" action="/item/{{item.item_id}}">
     <div class="upload_form">
@@ -237,7 +233,9 @@
             <option value="RETURNED" {% if item.status == 'RETURNED' %}selected{% endif %}>Returned</option>
         </select>
 
-        <input class='upload_submit_button' type="submit" value="Save Changes">
+        <div class="upload_submit_button">
+            <input type="submit" value="Save Changes">
+        </div>
 
     </div>
 </form>

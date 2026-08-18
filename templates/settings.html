@@ -3,29 +3,32 @@
 <h1 class="title">
     Settings
 </h1>
-<h2 class="sub_heading">
-    Change password
-</h2>
-<div class="change_password">
-    <form method="post" action="/settings">
-        <h3 class="login">Enter new password:</h3>
+
+
+<form method="post" action="/settings">
+    <div class="upload_form">
+        <h1>
+            Change password
+        </h1>
+        <h2 class="upload_form_subtitle">Enter new password:</h2>
         <div class="change_password_bar">
             <input type="text" name="new_password" minlength="6" maxlength="20" 
             maxlength="15" placeholder="6~20 characters and contain a number" required>
         </div>
-        <h3 class="settings_subtitles">Enter your previous password:</h3>
+        <h2 class="upload_form_subtitle">Enter your previous password:</h2>
         <div class="change_password_bar">
             <input type="password" name="old_password" minlength="6" maxlength="20" 
             maxlength="15" placeholder="Enter your old password" required>
         </div>
-        <div class="settings_submit_button">
+        <div class="submit_button">
             <div>
-                <input type="submit" value="Change Password" >
+                <input type="submit" value="Change Password">
             </div>
         </div>
-    </form>
-</div>
-<div class="delete_account_link">
+    </div>
+</form>
+
+<div class="delete_account_button">
     <a href="/delete_account">Delete account</a>
 </div>
 <!-- Flash messages start -->

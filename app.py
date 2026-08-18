@@ -78,7 +78,8 @@ ITEM_TYPE_LIST = [
     "T-Shirt",
     "Tank top",
     "Tie",
-    "Tights"
+    "Tights",
+    "Other"
 ]
 COLOUR_LIST = [
     "BHS Uniform",
@@ -231,7 +232,7 @@ def send_more_info_email(app, recipient, item_type):
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-app.secret_key = 'secretkey'
+app.secret_key = '4f828a2a8bc94fae9f50bc123456789aef01bc43210deab98fde7654321abcde'
 Session(app)
 
 # flask sqlalchemy testing stuff
@@ -313,6 +314,7 @@ def inject_variables():
     '''This route injects these variable into every route'''
     return dict(show_footer=True,
                 logged_in = current_user.is_authenticated,
+                current_user_clearance = session.get('clearance'),
                 min_time = "2026-01-01T00:00",
                 current_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
                 )
@@ -363,11 +365,11 @@ def upload():
         item_type = request.form.get('item_type')
         item_colours = request.form.getlist('colours[]')
         time_found = request.form.get('time_found') or None
-        size = request.form.get('size') or None
-        nametag = request.form.get('nametag') or None
+        size = request.form.get('size').strip() or None
+        nametag = request.form.get('nametag').strip() or None
         location = request.form.get('location') or None
         status = 'LOST AND FOUND'
-        notes = request.form.get('notes') or None
+        notes = request.form.get('notes').strip() or None
 
         # backend data check for item data
         is_valid, error_message = validate_item_data(item_type, item_colours, time_found, size, nametag, location, notes)
@@ -412,11 +414,11 @@ def find():
         item_type = request.form.get('item_type')
         item_colours = request.form.getlist('colours[]')
         time_missing = request.form.get('time_found') or None
-        size = request.form.get('size') or None
-        nametag = request.form.get('nametag') or None
-        location = request.form.get('location') or None
+        size = request.form.get('size').strip() or None
+        nametag = request.form.get('nametag').strip() or None
+        location = request.form.get('location').strip() or None
         status = 'LOOKING FOR'
-        notes = request.form.get('notes') or None
+        notes = request.form.get('notes').strip() or None
 
         # backend data check for item data
         is_valid, error_message = validate_item_data(item_type, item_colours, time_missing, size, nametag, location, notes)
@@ -458,6 +460,11 @@ def dashboard():
                                           status='LOOKING FOR').all()
     lost_and_found_items = LostItem.query.filter_by(finder_id=current_user.school_code,
                                                     status='LOST AND FOUND').all()
+
+    # appending the colour names
+    for item in lost_items + lost_and_found_items:
+            item.colour_names = [colour.name for colour in item.colours]
+
     return render_template('dashboard.html',
                            title='Dashboard',
                            lost_items=lost_items,
@@ -479,7 +486,7 @@ def admin():
     lost_and_found_query = LostItem.query.filter_by(status='LOST AND FOUND')
     missing_items_query = LostItem.query.filter_by(status='LOOKING FOR')
     returned_items_query = LostItem.query.filter_by(status='RETURNED')
-    recieved_items_query = LostItem.query.filter_by(status='RETURNED')
+    recieved_items_query = LostItem.query.filter_by(status='FOUND')
 
     if request.method == 'POST':
         finder_id = request.form.get('finder_id')
@@ -544,14 +551,17 @@ def admin():
 
     lost_and_found_items = lost_and_found_query.all()
     missing_items = missing_items_query.all()
-
+    returned_items = returned_items_query.all()
+    recieved_items = recieved_items_query.all()
 
     for item in lost_and_found_items + missing_items:
         item.colour_names = [colour.name for colour in item.colours]
     
     return render_template('admin.html', title='Admin',
                            lost_and_found_items=lost_and_found_items,
-                           missing_items=missing_items)
+                           missing_items=missing_items,
+                           returned_items=returned_items,
+                           recieved_items=recieved_items)
 
 
 @app.route('/item/<int:item_id>/match', methods=['POST', 'GET'])
@@ -684,7 +694,7 @@ def account_manager():
             # Users below clearance 1 cannot access this page
             return render_template('error.html',
                                    title='Access Forbidden',
-                                   error_title='Forbiddon',
+                                   error_title='Forbidden',
                                    error_message='You do not have permission to access this page')
     users = User.query.all()
     return render_template('account_manager.html',
@@ -700,7 +710,7 @@ def promote(user_id):
             # Users below clearance 1 cannot access this page
             return render_template('error.html',
                                    title='Access Forbidden',
-                                   error_title='Forbiddon',
+                                   error_title='Forbidden',
                                    error_message='You do not have permission to access this page')
 
     account = User.query.filter_by(user_id=user_id).first_or_404()
@@ -724,7 +734,7 @@ def demote(user_id):
             # Users below clearance 1 cannot access this page
             return render_template('error.html',
                                    title='Access Forbidden',
-                                   error_title='Forbiddon',
+                                   error_title='Forbidden',
                                    error_message='You do not have permission to access this page')
 
     account = User.query.filter_by(user_id=user_id).first_or_404()
@@ -883,12 +893,9 @@ def signup():
                 flash('Please provide a valid name length')
                 return redirect('/signup')
         # Checking school code is valid
-        if school_code is None:
+        if school_code is None or len(school_code) < 2 or len(school_code) > 5:
             flash('Please provide a valid school code')
             return redirect('/signup')
-        elif len(school_code) < 2 or len(school_code) > 5:
-            flash('Please provide a valid school code')
-            return redirect('/signup')    
         # Checking password
         if password is None:
             flash('Please provide a valid school code')
@@ -994,8 +1001,6 @@ def confirm():
         else:
             flash('Wrong confirmation number')
             return redirect('/confirm')
-        
-
 
     return render_template('confirm.html',
                            title='Confirm',)

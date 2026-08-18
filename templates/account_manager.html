@@ -43,11 +43,12 @@
         {% elif user.clearance == 2 %}
             Member (2)
         {% elif user.clearance == 3 %}
-            Disabled (4)
+            Disabled (3)
         {% endif %}
       </td>
-      <td class="edit_item_button"><a href="/promote/{{user.user_id}}">Promote</a></td>
-      <td class="edit_item_button"><a href="/demote/{{user.user_id}}">Demote</a></td>
+      
+      <td class="edit_item_button"><a class="match_button" href="/promote/{{user.user_id}}">Promote</a></td>
+      <td class="edit_item_button"><a class="delete_button" href="/demote/{{user.user_id}}">Demote</a></td>
     </tr>
     {% endfor %}
 </table>

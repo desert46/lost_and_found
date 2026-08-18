@@ -1,19 +1,20 @@
 {% extends "layout.html" %} 
 {% block content %}
+<div class="error_background">
+    <h1 class="error_title">{{error_title}}</h1>
+    <p class="error_message">{{error_message}}</p>
+    <p class="return_home"><a href="/home">Return home</a></p>
 
-<h1 class="error_title">{{error_title}}</h1>
-<p class="error_message">{{error_message}}</p>
-
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div class=flashes style="text-align: center; padding-top: 5px;">
-        {% for message in messages %}
-            <div>
-            {{ message }}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class=flashes style="text-align: center; padding-top: 5px;">
+            {% for message in messages %}
+                <div>
+                {{ message }}
+                </div>
+            {% endfor %}
             </div>
-        {% endfor %}
-        </div>
-    {% endif %}
-{% endwith %}
-
+        {% endif %}
+    {% endwith %}
+</div>
 {% endblock %}

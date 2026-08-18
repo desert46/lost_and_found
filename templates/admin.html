@@ -70,6 +70,7 @@
             <option value="Tank top">Tank top</option>
             <option value="Tie">Tie</option>
             <option value="Tights">Tights</option>
+            <option value="Other">Other (Specify in notes)</option>
         </select>
 
         <h2 class="upload_form_subtitle">Colour</h2>
@@ -168,7 +169,9 @@
             <option value="Lower Fields">Lower Fields</option>
         </select>
 
-        <input class='upload_submit_button' type="submit" value="Filter">
+        <div class="upload_submit_button">
+            <input type="submit" value="Filter">
+        </div>
     </div>
 </form>
 
@@ -204,7 +207,7 @@
       <td>{{item.nametag}}</td>
       <td>{{item.location}}</td>
       <td>{{item.status}}</td>
-            <td>
+      <td>
         {% if item.colour_names %}
             {% for colour in item.colour_names %}
               {{ colour }},
@@ -214,7 +217,7 @@
         {% endif %}
       </td>
       <td>{{item.notes}}</td>
-      <td class="edit_item_button"><a href="/item/{{item.item_id}}">Edit</a></td>
+      <td class="edit_item_button"><a class="edit_button" href="/item/{{item.item_id}}">Edit</a></td>
     </tr>
     {% endfor %}
 </table>
@@ -252,19 +255,19 @@
       <td>{{item.location}}</td>
       <td>{{item.status}}</td>
       <td>
-        {% if colour_names %}
-            {% for colour in colour_names %}
-              {{ colour }},
-            {% endfor %}
+        {% if item.colour_names %}
+          {% for colour in item.colour_names %}
+            {{ colour }},
+          {% endfor %}
         {% else %}
           None
         {% endif %}
       </td>
       <td>{{item.notes}}</td>
       <td class="edit_item_button">
-        <a href="/item/{{item.item_id}}/delete">Delete</a>
+        <a class="edit_button" href="/item/{{item.item_id}}">Edit</a>
           <br>
-        <a href="/item/{{item.item_id}}/match">Match</a>
+        <a class="match_button" href="/item/{{item.item_id}}/match">Match</a>
       </td>
     </tr>
     {% endfor %}
