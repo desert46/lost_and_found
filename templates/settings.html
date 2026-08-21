@@ -4,6 +4,36 @@
     Settings
 </h1>
 
+<table class="item_info_table">
+  <h2 class="sub_heading">Your information</h2>
+    <tr>
+      <th class="item_info_header">User ID</th>
+      <th class="item_info_header">First name</th>
+      <th class="item_info_header">Last name</th>
+      <th class="item_info_header">School code</th>
+      <th class="item_info_header">Email</th>
+      <th class="item_info_header">Clearance</th>
+    </tr> 
+    <tr class="item_info_row">
+      <th>{{user.user_id}}</th>
+      <td>{{user.first_name}}</td>
+      <td>{{user.last_name}}</td>
+      <td>{{user.school_code}}</td>
+      <td>{{user_email}}</td>
+      <td>
+        {% if user.clearance == 0 %}
+            Owner (0)
+        {% elif user.clearance == 1 %}
+            Admin (1)
+        {% elif user.clearance == 2 %}
+            Member (2)
+        {% elif user.clearance == 3 %}
+            Disabled (3)
+        {% endif %}
+      </td>
+
+    </tr>
+</table>
 
 <form method="post" action="/settings">
     <div class="upload_form">
@@ -25,12 +55,13 @@
                 <input type="submit" value="Change Password">
             </div>
         </div>
+        <div class="delete_account_button">
+            <a href="/delete_account">If you want to delete your account, click here</a>
+        </div>
     </div>
 </form>
 
-<div class="delete_account_button">
-    <a href="/delete_account">Delete account</a>
-</div>
+
 <!-- Flash messages start -->
 {% with messages = get_flashed_messages() %}
   {% if messages %}

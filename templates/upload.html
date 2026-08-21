@@ -3,6 +3,10 @@
 
 <h1 class="title">Upload</h1>
 
+<div class="info_text">
+  <p>ⓘ Here you can upload lost property you have found before handing it to the student office</p>
+</div>
+
 <!-- Flash messages start -->
 {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -134,7 +138,7 @@
 
 
         <h2 class="upload_form_subtitle">Time found:</h2>
-        <p> e.g. 06/07/2026, 01:50 PM</p>
+        <p>Press on the calendar icon to select a date and time</p>
         <input class='upload_datetime' type="datetime-local" name="time_found" min="{{min_time}}" max="{{current_time}}">
 
         <h2 class="upload_form_subtitle">Size:</h2>

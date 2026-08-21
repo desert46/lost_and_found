@@ -3,6 +3,10 @@
 
 <h1 class="title">Find</h1>
 
+<div class="info_text">
+  <p>ⓘ Here you can upload items that you have lost and are looking for</p>
+</div>
+
 <!-- Flash messages start -->
 {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -133,7 +137,7 @@
 
 
         <h2 class="upload_form_subtitle">Time Lost:</h2>
-        <p> e.g. 06/07/2026, 01:50 PM</p>
+        <p>Press on the calendar icon to select a date and time</p>
         <input class='upload_datetime' type="datetime-local" name="time_found" min="{{min_time}}" max="{{current_time}}">
 
         <h2 class="upload_form_subtitle">Size:</h2>
@@ -180,7 +184,7 @@
         <input class='upload_text_box' type="text" name="notes" maxlength="67" placeholder="Max length of 67 characters">
 
         <div class="upload_submit_button">
-            <input type="submit" value="submit">
+            <input type="submit" value="Submit">
         </div>
     </div>
 </form>

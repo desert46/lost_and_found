@@ -6,7 +6,15 @@ body{
     margin: 0;
     padding: 0;
     color: black;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
+
+main {
+    flex: 1;
+}
+
 .title{
     text-align: center;
     color: var(--bhs_turquoise);
@@ -44,7 +52,7 @@ body{
 }
 .error_background {
     background-image: url(../images/404_background.jpg);
-    filter: brightness(0.67);
+
     background-color: black;
     background-size: cover;
     background-repeat: no-repeat;
@@ -128,25 +136,17 @@ body{
     border-bottom: 5px solid white;
     text-align: center;
 }
-.hero_image::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.3);
-}
 .hero_title{
     margin: 0;
     font-size: 6rem;
     color: white;
     padding-top: 10%;
-    z-index: 1;
     position: relative;
 }
 .hero_text{
     color: white;
     font-size: 2rem;
     font-weight: bold;
-    z-index: 1;
     position: relative;
 }
 .signup_hero_button a{
@@ -158,7 +158,6 @@ body{
     color: white;
     text-decoration: none;
     transition: var(--transition-time) ease;
-    z-index: 1;
     position: relative;
 }
 .signup_hero_button a:hover{
@@ -167,6 +166,14 @@ body{
     color: #000000;
 }
 /* Hero Image Style end */
+
+.info_text{
+    text-align: center;
+}
+.info_text p{
+    text-align: center;
+    font-weight: bold;
+}
 
 /* Navigation bar style start */
 .navigation_bar{
@@ -179,7 +186,6 @@ body{
     margin-left: 0;
     border-bottom: 5px solid black;
     height: 60px;
-    z-index: 1;
     position: relative;
 }
 .navigation_links {
@@ -272,18 +278,6 @@ body{
     background-color: white;
     box-sizing: border-box;
     font-size: 0.96rem;
-}
-.forgot_password{
-    margin: 0.5rem 0 1rem 0;
-    font-style: underline;
-}
-.forgot_password a{
-    color: #4b5563;
-    text-decoration: none;
-    transition: var(--transition-time) ease;
-}
-.forgot_password a:hover{
-    color: var(--bhs_turquoise);
 }
 .login_signup_submit_button{
     display: flex;
@@ -452,6 +446,15 @@ body{
     border-color: var(--bhs_turquoise);
 }
 
+.delete_account_button a{
+    text-align: center;
+    color: red;
+}
+.delete_account_button a:hover{
+    transition: var(--transition-time);
+    color: white;
+}
+
 .delete_account_page .settings_panel {
     border-color: rgba(201, 59, 59, 0.22);
 }
@@ -502,6 +505,7 @@ body{
     display: flex;
     justify-content: flex-start;
     margin-top: 0.75rem;
+
 }
 
 .delete_account_submit_button input,
@@ -534,9 +538,6 @@ footer {
     text-align: center;
     color: white;
     width: 100%;
-    position: fixed;
-    bottom: 0; 
-
 }
 /* Footer Style end */
 
@@ -596,3 +597,27 @@ footer {
     color: #000000;
     border-color: var(--bhs_turquoise);
 }
+/* About page style start */
+span{
+    color: var(--bhs_turquoise);
+    font-weight: bold;
+}
+.about_container{
+    text-align: center;
+    height: auto;
+}
+.about_container p{
+    margin: 5px 20%;
+}
+.about_container a{
+    color: var(--bhs_turquoise);
+    font-weight: bold;
+}
+.about_container a:hover{
+    color: gray;
+    transition-duration: var(--transition-time);
+}
+.about_container_inquiry{
+    font-weight: bold;
+}
+/* About page style end */

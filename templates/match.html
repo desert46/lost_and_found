@@ -2,8 +2,11 @@
 {% block content %}
 
 <h1 class="title">
-    Match
+    Match Item [{{current_item.item_id}}]
 </h1>
+<div class="info_text">
+  <p>ⓘ Here you can match your selected lost item with one that has been found. You may also request more info on the selected item.</p>
+</div>
 
 <!-- Flash messages start -->
 {% with messages = get_flashed_messages() %}
@@ -19,7 +22,7 @@
 {% endwith %}
 
 <table class="item_info_table">
-    <h2 class="sub_heading">Current Missing Item</h2>
+    <h2 class="sub_heading">Selected item</h2>
     <tr>
       <th class="item_info_header">Item ID</th>
       <th class="item_info_header">Finder's code</th>
@@ -34,7 +37,7 @@
       <th class="item_info_header">Action</th>
     </tr> 
 
-    <tr class="item_info_row">
+    <tr class="item_info_row" style="background-color: white; color: red; font-weight: bold;">
       <td>{{current_item.item_id}}</td>
       <td>{{current_item.finder_id}}</td>
       <td>{{current_item.item_type}}</td>

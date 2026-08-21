@@ -134,6 +134,7 @@ LOCATION_LIST = [
     'Lower Fields',
 ]
 
+
 # Functions
 def validate_item_data(item_type,
                        item_colours,
@@ -149,7 +150,7 @@ def validate_item_data(item_type,
     '''
     if item_type not in ITEM_TYPE_LIST:
         return False, 'Please provide a item type'
-    
+
     for colour in item_colours:
         if colour not in COLOUR_LIST:
             return False, 'Please provide valid colours'
@@ -159,7 +160,7 @@ def validate_item_data(item_type,
             # formatting the time format so it can be compared properly
             time_found_formatted = datetime.strptime(time_found, "%Y-%m-%dT%H:%M")
             print(time_found_formatted)
-        except:
+        except (ValueError, TypeError):
             return False, "Please provide a valid date and time."
 
         if time_found_formatted > datetime.now():
@@ -167,16 +168,16 @@ def validate_item_data(item_type,
 
     if location not in LOCATION_LIST:
         return False, 'Please provide a valid location'
-    
+
     if size is not None and len(size) > 10:
         return False, 'Please provide valid lengths for your inputs'
-    
+
     if nametag is not None and len(nametag) > 20:
         return False, 'Please provide valid lengths for your inputs'
-    
+
     if notes is not None and len(notes) > 67:
         return False, 'Please provide valid lengths for your inputs'
-    
+
     return True, None
 
 
@@ -251,6 +252,7 @@ app.config['MAIL_DEFAULT_SENDER'] = auth.sender_email
 
 mail = Mail(app)
 
+
 # FlaskSQAlchemy tables
 class User(db.Model, UserMixin):
     '''Database table containing the User information'''
@@ -258,7 +260,7 @@ class User(db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    password = db.Column(db.String(128), nullable=False) 
+    password = db.Column(db.String(128), nullable=False)
     school_code = db.Column(db.String(20), nullable=False, unique=True)
     clearance = db.Column(db.Integer, default=2)
 
@@ -291,7 +293,7 @@ class Colour(db.Model):
 
 # the linking table that links LostItem and Colour
 lostitem_colour = db.Table(
-    'lostitem_colour', 
+    'lostitem_colour',
     db.Column('iid', db.Integer, db.ForeignKey('lost_item.item_id')),
     db.Column('cid', db.Integer, db.ForeignKey('colour.colour_id'))
 )
@@ -313,10 +315,10 @@ def load_user(user_id):
 def inject_variables():
     '''This route injects these variable into every route'''
     return dict(show_footer=True,
-                logged_in = current_user.is_authenticated,
-                current_user_clearance = session.get('clearance'),
-                min_time = "2026-01-01T00:00",
-                current_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
+                logged_in=current_user.is_authenticated,
+                current_user_clearance=session.get('clearance'),
+                min_time="2026-01-01T00:00",
+                current_time=datetime.now().strftime("%Y-%m-%dT%H:%M")
                 )
 
 
@@ -329,12 +331,12 @@ def before_request():
     if request.endpoint in ['logout', 'static']:
         # User can still log out but is still denied from each route
         return
-    
-    if current_user.is_authenticated is True and current_user.clearance == 4:
+
+    if current_user.is_authenticated is True and current_user.clearance == 3:
         return render_template("error.html",
-                                    title="Forbidden",
-                                    error_title="Your account has been disabled",
-                                    error_message="Please contact an admin")
+                               title="Forbidden",
+                               error_title="Your account has been disabled",
+                               error_message="Please contact an administrator")
 
 
 # Beginning of Routes/Pages
@@ -347,10 +349,9 @@ def home():
     # prevent logged in users from accessing the page
     if current_user.is_authenticated:
         return redirect('/dashboard')
-    
+
     return render_template('index.html',
-                           title = 'Home',
-                           )
+                           title='Home',)
 
 
 @app.route('/upload', methods=['POST', 'GET'])
@@ -372,31 +373,37 @@ def upload():
         notes = request.form.get('notes').strip() or None
 
         # backend data check for item data
-        is_valid, error_message = validate_item_data(item_type, item_colours, time_found, size, nametag, location, notes)
+        is_valid, error_message = validate_item_data(item_type,
+                                                     item_colours,
+                                                     time_found,
+                                                     size,
+                                                     nametag,
+                                                     location,
+                                                     notes)
         if not is_valid:
             flash(error_message)
             return redirect('/upload')
 
         item = LostItem(finder_id=finder_id,
-                       item_type=item_type,
-                       time_found=time_found,
-                       size=size,
-                       nametag=nametag,
-                       location=location,
-                       status=status,
-                       notes=notes)
-        
+                        item_type=item_type,
+                        time_found=time_found,
+                        size=size,
+                        nametag=nametag,
+                        location=location,
+                        status=status,
+                        notes=notes)
+
         for item_colour in item_colours:
             # checking if colour is valid
             colour = Colour.query.filter_by(name=item_colour).first()
             if colour:
                 item.colours.append(colour)
 
-        db.session.add(item)       
+        db.session.add(item)
         db.session.commit()
 
         flash('Item uploaded successfully')
-        
+
     return render_template('upload.html',
                            title='Upload',)
 
@@ -421,19 +428,25 @@ def find():
         notes = request.form.get('notes').strip() or None
 
         # backend data check for item data
-        is_valid, error_message = validate_item_data(item_type, item_colours, time_missing, size, nametag, location, notes)
+        is_valid, error_message = validate_item_data(item_type,
+                                                     item_colours,
+                                                     time_missing,
+                                                     size,
+                                                     nametag,
+                                                     location,
+                                                     notes)
         if not is_valid:
             flash(error_message)
             return redirect('/find')
 
         item = LostItem(finder_id=finder_id,
-                       item_type=item_type,
-                       time_found=time_missing,
-                       size=size,
-                       nametag=nametag,
-                       location=location,
-                       status=status,
-                       notes=notes)
+                        item_type=item_type,
+                        time_found=time_missing,
+                        size=size,
+                        nametag=nametag,
+                        location=location,
+                        status=status,
+                        notes=notes)
 
         # Adding colours one at a time
         for item_colour in item_colours:
@@ -463,13 +476,13 @@ def dashboard():
 
     # appending the colour names
     for item in lost_items + lost_and_found_items:
-            item.colour_names = [colour.name for colour in item.colours]
-
+        item.colour_names = [colour.name for colour in item.colours]
+    name = f'{current_user.first_name} {current_user.last_name}'
     return render_template('dashboard.html',
                            title='Dashboard',
                            lost_items=lost_items,
                            lost_and_found_items=lost_and_found_items,
-                           user_name = (f'{current_user.first_name} {current_user.last_name}'))
+                           name=name)
 
 
 @app.route('/admin', methods=['POST', 'GET'])
@@ -547,7 +560,6 @@ def admin():
             recieved_items_query = recieved_items_query.filter(
                 LostItem.finder_id == finder_id
             )
-            
 
     lost_and_found_items = lost_and_found_query.all()
     missing_items = missing_items_query.all()
@@ -556,12 +568,14 @@ def admin():
 
     for item in lost_and_found_items + missing_items:
         item.colour_names = [colour.name for colour in item.colours]
-    
+
+    name = current_user.first_name
     return render_template('admin.html', title='Admin',
                            lost_and_found_items=lost_and_found_items,
                            missing_items=missing_items,
                            returned_items=returned_items,
-                           recieved_items=recieved_items)
+                           recieved_items=recieved_items,
+                           name=name)
 
 
 @app.route('/item/<int:item_id>/match', methods=['POST', 'GET'])
@@ -573,12 +587,12 @@ def match(item_id):
     current lost and found items and then return them to the student
     '''
     if current_user.clearance > 1:   # Clearance check, Admins only
-            # Users below clearance 1 cannot access this page
-            return render_template('error.html',
-                                   title='Access Forbidden',
-                                   error_title='Forbidden',
-                                   error_message='You do not have permission to access this page')
-    
+        # Users below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidden',
+                               error_title='Forbidden',
+                               error_message='You do not have permission to access this page')
+
     current_item = LostItem.query.filter_by(item_id=item_id).first_or_404()
     if current_item.status != 'LOOKING FOR':
         abort(404)
@@ -598,23 +612,19 @@ def return_item(looking_for_item_id, item_match_id):
     found items. This will send a notification to the person with the lost item
     '''
     if current_user.clearance > 1:   # Clearance check, Admins only
-            # Users below clearance 1 cannot access this page
-            return render_template('error.html',
-                                   title='Access Forbidden',
-                                   error_title='Forbidden',
-                                   error_message='You do not have permission to access this page')
+        # Users below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidden',
+                               error_title='Forbidden',
+                               error_message='You do not have permission to access this page')
 
     looking_for_item = LostItem.query.filter_by(item_id=looking_for_item_id).first_or_404()
-    print(2)
     current_lost_item = LostItem.query.filter_by(item_id=item_match_id).first_or_404()
-    print(current_lost_item.status)
     if current_lost_item.status != 'LOST AND FOUND':
         abort(404)
-        print('3')
 
     if looking_for_item.status != 'LOOKING FOR':
         abort(404)
-        print('4')
     looking_for_item.status = 'FOUND'
     current_lost_item.status = 'RETURNED'
     db.session.commit()
@@ -622,7 +632,6 @@ def return_item(looking_for_item_id, item_match_id):
     # sending email
     recipient_school_code = looking_for_item.finder_id
     recipient_item_type = looking_for_item.item_type
-    print(5)
     try:
         recipient = f"{recipient_school_code}{auth.domain_name}"
         # Sending the email in the background so redirect can occur immediatly
@@ -648,12 +657,11 @@ def return_item(looking_for_item_id, item_match_id):
 def request_info(item_id):
     '''A route that allows admins to request more info about an item'''
     if current_user.clearance > 1:   # Clearance check, Admins only
-            # Users below clearance 1 cannot access this page
-            return render_template('error.html',
-                                   title='Access Forbidden',
-                                   error_title='Forbidden',
-                                   error_message='You do not have permission to access this page')
-
+        # Users below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidden',
+                               error_title='Forbidden',
+                               error_message='You do not have permission to access this page')
 
     looking_for_item = LostItem.query.filter_by(item_id=item_id).first_or_404()
 
@@ -672,14 +680,12 @@ def request_info(item_id):
             args=(app, recipient, item_type),
             daemon=True
         ).start()
-        flash(f'Email sent succerssfully to {recipient}')
-        print(f"Email sent successfully to {recipient}")
+        flash(f'Email sent successfully to {recipient}')
     except Exception as e:
         # Captures the error pessage and prints it in terminal
         print(f"Failed to send email: {e}")
         flash("An error occured, please try again later.")
         return redirect('/dashboard')
-        
     return redirect('/admin')
 
 
@@ -691,11 +697,11 @@ def account_manager():
     They will have the ability to promote and demote accounts
     '''
     if current_user.clearance > 1:   # Clearance check, Admins only
-            # Users below clearance 1 cannot access this page
-            return render_template('error.html',
-                                   title='Access Forbidden',
-                                   error_title='Forbidden',
-                                   error_message='You do not have permission to access this page')
+        # Users below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidden',
+                               error_title='Forbidden',
+                               error_message='You do not have permission to access this page')
     users = User.query.all()
     return render_template('account_manager.html',
                            title='Account Manager',
@@ -707,17 +713,20 @@ def account_manager():
 def promote(user_id):
     '''Route that can be used to promote someones clearance, admins only'''
     if current_user.clearance > 1:   # Clearance check, Admins only
-            # Users below clearance 1 cannot access this page
-            return render_template('error.html',
-                                   title='Access Forbidden',
-                                   error_title='Forbidden',
-                                   error_message='You do not have permission to access this page')
+        # Users below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidden',
+                               error_title='Forbidden',
+                               error_message='You do not have permission to access this page')
 
     account = User.query.filter_by(user_id=user_id).first_or_404()
 
-    # Making sure admins can't be promote
+    # Making sure admins and yourself can't be promoted
     if account.clearance <= 1:
         flash('Admins cannot be promoted')
+        return redirect('/account_manager')
+    elif account.user_id == current_user.user_id:
+        flash('You cannot promote yourself')
         return redirect('/account_manager')
     else:
         account.clearance -= 1
@@ -731,17 +740,20 @@ def promote(user_id):
 def demote(user_id):
     '''Route that can be used to promote someones clearance, admins only'''
     if current_user.clearance > 1:   # Clearance check, Admins only
-            # Users below clearance 1 cannot access this page
-            return render_template('error.html',
-                                   title='Access Forbidden',
-                                   error_title='Forbidden',
-                                   error_message='You do not have permission to access this page')
+        # Users below clearance 1 cannot access this page
+        return render_template('error.html',
+                               title='Access Forbidden',
+                               error_title='Forbidden',
+                               error_message='You do not have permission to access this page')
 
     account = User.query.filter_by(user_id=user_id).first_or_404()
 
-    # Making sure disabled accounts can't be demoted
+    # Making sure disabled accounts and yourself can't be demoted
     if account.clearance >= 4:
         flash('Admins cannot be promoted')
+        return redirect('/account_manager')
+    elif account.user_id == current_user.user_id:
+        flash('You cannot demote yourself')
         return redirect('/account_manager')
     else:
         account.clearance += 1
@@ -753,13 +765,16 @@ def demote(user_id):
 @app.route('/item/<int:item_id>', methods=['GET', 'POST'])
 @login_required
 def item(item_id):
+    '''Route for the item page where users can edit their items'''
     item = LostItem.query.get_or_404(item_id)
+    print(item.status == 'LOST AND FOUND')
+    if item.status != 'LOOKING FOR' and item.status != 'LOST AND FOUND':
+        abort(404)
 
-    if current_user.clearance > 1:   # Clearance check, Admin or Finder only
-    # If the user isnt an admin, they need to be the finder of the item
-        if current_user.school_code != str(item.finder_id):
-            print('aborted')
-            abort(404)
+    # User needs to be the one looking for the item to access this page or an admin
+    if current_user.school_code != str(item.finder_id) and current_user.clearance > 1:
+        print('aborted')
+        abort(404)
 
     items = [item]
     # getting list of colours for preselecting colour options
@@ -772,7 +787,6 @@ def item(item_id):
         item.size = request.form.get('size') or None
         item.nametag = request.form.get('nametag') or None
         item.location = request.form.get('location') or None
-        item.status = request.form.get('item_status') or None
         item.notes = request.form.get('notes') or None
 
         # backend data check for item data
@@ -804,12 +818,12 @@ def item(item_id):
 @app.route('/item/<int:item_id>/delete', methods=['POST', 'GET'])
 @login_required
 def delete(item_id):
-    
+    '''Route for deleting an item, only the finder of the item or an admin can delete it'''
     item = LostItem.query.get_or_404(item_id)
     print('test')
     print(item)
     if current_user.clearance > 1:   # Clearance check
-    # If the user isnt an admin, they need to be the finder of the item
+        # If the user isnt an admin, they need to be the finder of the item
         if current_user.school_code != item.finder_id:
             abort(404)
     db.session.delete(item)
@@ -820,11 +834,11 @@ def delete(item_id):
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    '''Docstring for login'''
+    '''Route for login page where the user can log in using their school code and password'''
     # prevent logged in users from accessing the page
     if current_user.is_authenticated:
-            return redirect('/dashboard')
-    
+        return redirect('/dashboard')
+
     if request.method == 'POST':
         school_code = request.form.get('school_code')
         inputted_password = request.form.get('password')
@@ -851,12 +865,12 @@ def login():
         else:
             flash('Incorrect password, please try again')
             return redirect('/login')
-    
+
     return render_template('login.html', title='Log in')
 
 
 @app.route('/signup', methods=['POST', 'GET'])
-def signup(): 
+def signup():
     '''
     This is the route that leads to the signup page. This page allows the
     user to sign up using a name, school code, and password.
@@ -867,7 +881,7 @@ def signup():
     # prevent logged in users from accessing the page
     if current_user.is_authenticated:
             return redirect('/dashboard')
-    
+
     if request.method == 'POST':
         first_name = request.form.get('first_name').strip()
         last_name = request.form.get('last_name').strip()
@@ -906,7 +920,7 @@ def signup():
         elif password.isalpha():
             flash("Your password must have a number or special character")
             return render_template("signup.html", title="Sign up")
-        
+
         # Checking that this account doesn't already exist
         existing_users = User.query.filter_by(school_code=school_code).first()
         print(existing_users)
@@ -946,8 +960,8 @@ def signup():
 
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm():
-    '''Confirmation email'''
-    
+    '''Confirmation email route'''
+
     # getting variables from the session
     print('confirm route')
     first_name = session.get('first_name')
@@ -1009,7 +1023,12 @@ def confirm():
 @app.route('/settings', methods=['POST', 'GET'])
 @login_required
 def settings():
-    '''Route for settings. Users can cahnge their password and delete their accounts here'''
+    '''
+    Route for settings. Users can change their password and
+    delete their accounts here
+    '''
+    user = User.query.filter_by(user_id=current_user.user_id).first_or_404()
+    user_email = f'{user.school_code}{auth.domain_name}'
     if request.method == 'POST':
         old_password = request.form.get('old_password')
         new_password = request.form.get('new_password')
@@ -1048,13 +1067,18 @@ def settings():
             print('Password Successfully Updated')
             flash('Password Successfully Updated')
 
-        
-    return render_template('settings.html', title='Settings')
+    return render_template('settings.html',
+                           user=user,
+                           user_email=user_email,
+                           title='Settings')
 
 
 @app.route('/delete_account', methods=['POST', 'GET'])
 @login_required
 def delete_account():
+    '''
+    Route for deleting the user's account
+    '''
     if request.method == 'POST':
         inputted_password = request.form.get('password')
         checkbox = request.form.get('delete_account_checkbox')
@@ -1066,7 +1090,7 @@ def delete_account():
         if checkbox != 'Checked':
             flash('Please check the checkbox and input your password to proceed')
             return redirect('/delete_account')
-        
+
         # Checking if password is correct
         # Hashing inputted password
         h = hashlib.new("SHA256")
@@ -1076,7 +1100,7 @@ def delete_account():
             print(f'Deleting the account of {current_user.school_code}')
             account = User.query.filter_by(school_code=current_user.school_code).first_or_404()
             # Delete all lost items and their colours associated with the user
-            lost_items = LostItem.query.filter_by(finder_id=account.user_id).all()
+            lost_items = LostItem.query.filter_by(finder_id=account.school_code).all()
             for item in lost_items:
                 item.colours.clear()
                 db.session.delete(item)
@@ -1092,7 +1116,6 @@ def delete_account():
             flash('Incorrect password')
             return redirect('/delete_account')
 
-
     return render_template('delete_account.html', title='Delete Account')
 
 
@@ -1101,7 +1124,9 @@ def about():
     '''
     Route for about page. Page contains general information about the site
     '''
+    clearance = current_user.clearance
     return render_template('about.html',
+                           clearance=clearance,
                            title='About',)
 
 
@@ -1127,5 +1152,24 @@ def page_not_found(e):
                            error_message="404 page not found"), 404
 
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    '''Custom Error 500 page'''
+    return render_template("error.html",
+                           title='Internal Server Error',
+                           error_title='Sorry, we are a little bit lost',
+                           error_message='500 Internal Server Error'), 500
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    '''Custom Error 403 page'''
+    return render_template("error.html",
+                           title='Access Forbidden',
+                           error_title='Forbidden',
+                           error_message='You do not have permission to access this page'), 403
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
+# DONEZO

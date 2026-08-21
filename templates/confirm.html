@@ -4,16 +4,17 @@
 <h1 class="title">
     Enter your confirmation code
 </h1>
-<h2>
-    This may take several minutes to send
-</h2>
 
-<form method='post' action="">
-    <div>
+
+<form method='post' action="/confirm" class="upload_form">
+    <h2>
+        It may take several minutes to recieve the code
+    </h2>
+    <div class="change_password_bar">
         <input type="number" name="confirmation_number" required>
     </div>
-    <div>
-        <input type="submit" value="submit">
+    <div class="submit_button">
+        <input type="submit" value="Enter">
     </div>
 </form>
 

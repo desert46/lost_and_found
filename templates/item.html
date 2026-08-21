@@ -3,6 +3,10 @@
 
 <h1 class="title">Item ID [{{item_id}}]</h1>
 
+<div class="info_text">
+  <p>ⓘ Here you can edit the information of your items</p>
+</div>
+
 <!-- Flash messages start -->
 {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -23,7 +27,7 @@
     <tr>
       <th class="item_info_header">Finder's code</th>
       <th class="item_info_header">Item type</th>
-      <th class="item_info_header">Time found</th>
+      <th class="item_info_header">Time</th>
       <th class="item_info_header">Item size</th>
       <th class="item_info_header">Nametag</th>
       <th class="item_info_header">Location</th>
@@ -33,7 +37,7 @@
       <th class="item_info_header">Action</th>
     </tr> 
     
-    <tr class="item_info_row">
+    <tr class="item_info_row" style="background-color: white; color: red; font-weight: bold;">
       <td>{{item.finder_id}}</td>
       <td>{{item.item_type}}</td>
       <!-- formatting date and time into a more readable format -->
@@ -112,6 +116,7 @@
             <option value="Tank top" {% if item.item_type == 'Tank top' %}selected{% endif %}>Tank top</option>
             <option value="Tie" {% if item.item_type == 'Tie' %}selected{% endif %}>Tie</option>
             <option value="Tights" {% if item.item_type == 'Tights' %}selected{% endif %}>Tights</option>
+            <option value="Other" {% if item.item_type== 'Other' %} selected {% endif %}>Other (Specify in notes)</option>
         </select>
 
         <h2 class="upload_form_subtitle">Colour:</h2>
@@ -181,8 +186,8 @@
   
 
 
-        <h2 class="upload_form_subtitle">Time found:</h2>
-        <p> e.g. 06/07/2026, 01:50 PM</p>
+        <h2 class="upload_form_subtitle">Time:</h2>
+        <p>Press on the calendar icon to select a date and time</p>
         <input class='upload_datetime' type="datetime-local" name="time_found" value="{{item.time_found}}" min="{{min_time}}" max="{{current_time}}">
 
         <h2 class="upload_form_subtitle">Size:</h2>
@@ -225,13 +230,6 @@
 
         <h2 class="upload_form_subtitle">Notes:</h2>
         <input class='upload_text_box' type="text" name="notes" value="{{item.notes}}">
-
-        <h2 class="upload_form_subtitle">Item Status:</h2>
-        <select name="item_status" class="upload_type_dropdown">
-            <option value="LOST AND FOUND" {% if item.status == 'LOST AND FOUND' %}selected{% endif %}>Lost and Found</option>
-            <option value="LOOKING FOR" {% if item.status == 'LOOKING FOR' %}selected{% endif %}>Looking for</option>
-            <option value="RETURNED" {% if item.status == 'RETURNED' %}selected{% endif %}>Returned</option>
-        </select>
 
         <div class="upload_submit_button">
             <input type="submit" value="Save Changes">

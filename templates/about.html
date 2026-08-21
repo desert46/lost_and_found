@@ -2,6 +2,43 @@
 {% block content %}
 
 <h1 class="title">About</h1>
-<p style="text-align: center;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam vitae praesentium eius tenetur optio, autem ut odit minima quae voluptatum dolorum porro dignissimos. Aut, asperiores non officiis architecto maxime ab? Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsam cum molestias animi, quas est beatae cupiditate, assumenda, itaque eaque vero incidunt corporis quis eos esse necessitatibus debitis dolore earum iusto?Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem impedit ab asperiores ullam tempora labore numquam, eaque quibusdam ut mollitia dolore sint harum repellat est consectetur, recusandae, temporibus officia. Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat illum voluptatum inventore nobis dignissimos numquam dolore quidem, quam maxime magni eum eveniet similique nesciunt vero dolores blanditiis explicabo, quis ullam. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas laudantium eaque enim eius harum hic! Quas veniam minus, quibusdam sit libero nostrum tenetur voluptas eos exercitationem iusto doloribus! Quam, pariatur?Lorem, ipsum dolor sit amet consectetur adipisicing elit. Asperiores, repudiandae? Vel eveniet sed aspernatur cupiditate magnam necessitatibus eligendi aperiam hic labore nemo inventore voluptates dolorem sint ad, quibusdam ducimus eius.</p>
+<div class="about_container">
+    <p>This webapp focuses on the lost proptery system at BHS.
+    The goal of this webapp is to digitise the current lost property system.
+    The webapp can be used by students to upload property they have found or to upload requests to retrieve an item they have lost
+    </p>
+    <h2 class="about_subheading">How to use</h2>
+    <p>If you have found an item, simply visit the <a href="/upload">Upload</a> page and fill in the details of the item.
+        Include as many extra details in the notes section as possible. Then hand the lost and found item to the student office as soon as possible.
+    </p>
+    <br>
+    <p>If you have lost an item, simply visit the <a href="/find">Find</a> page and fill in the details of the item.
+        Include as many extra details in the notes section as possible. An admin will update you on the status of the lost item
+        as soon as possible. You may be required to input more information on your item. You can do this by pressing edit on any item and updating the notes section with additional details. You may have to wait several days for a response.
+    </p>
+    {% if clearance <= 1 %}
+    <h2 class="about_subheading">
+        How to use Admin Panel
+    </h2>
+    <p>
+        The admin panel allows you to edit any item in the database by pressing the <span>Edit</span> button. If you want to return an item to a student,
+        press the <span>Match</span> button to select an item that a student is looking for. Then simply press the <span>Return</span>
+        button on the respective item that has been found. This will pair the items and send an email to the student notifying them that their property
+        has been found. To request more info on an item, press the <span>Match</span> button to select the item then press <span>Request Info</span>. This 
+        will send an email to the student asking for more information about the item.
+    </p>
+    <br>
+    <p>
+        To manage accounts, go to the <a href="/account_manager">Manage</a> page to view all of the active accounts.
+        Here you will be able to <span>Demote</span> or <span>Promote</span> a user by pressing the respective buttons. Every user starts off as a Member with Level 2 clearance. They may be demoted down to clearance Level 3 which signifies a disabled account that will denied service from the website. Users may also be promoted up to Level 1 clearance signiying an admin. Admins will have access to the admin panel and account manager and will be expected to manage the BHS Lost Property System. You may not demote or promote yourself.
+    </p>
+    {% endif %}
+    <br>
+    <p class="about_container_inquiry">
+        For any inquiries, contact <span>22177@burnside.school.nz</span>
+    </p>
+    <br>
+</div>
+
 
 {% endblock %}
