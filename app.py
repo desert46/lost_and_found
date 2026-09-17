@@ -749,8 +749,8 @@ def demote(user_id):
     account = User.query.filter_by(user_id=user_id).first_or_404()
 
     # Making sure disabled accounts and yourself can't be demoted
-    if account.clearance >= 4:
-        flash('Admins cannot be promoted')
+    if account.clearance == 3:
+        flash('Disabled accounts cannot be demoted')
         return redirect('/account_manager')
     elif account.user_id == current_user.user_id:
         flash('You cannot demote yourself')
@@ -1124,7 +1124,13 @@ def about():
     '''
     Route for about page. Page contains general information about the site
     '''
-    clearance = current_user.clearance
+    print('2')
+    clearance = session.get('clearance')
+    if clearance is None:
+        print(3)
+        clearance = 5
+    print(type(clearance))
+    print(clearance)
     return render_template('about.html',
                            clearance=clearance,
                            title='About',)
@@ -1171,5 +1177,5 @@ def forbidden(e):
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
 # DONEZO
