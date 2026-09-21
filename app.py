@@ -5,7 +5,6 @@ The goal of this project is to digitise the current lost property system.
 '''
 
 # imports
-import hashlib
 import random
 from datetime import datetime
 from threading import Thread
@@ -30,112 +29,43 @@ from flask_login import (
 )
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
-
-import auth
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask_session import Session
-
-# Constants
-ITEM_TYPE_LIST = [
-    "BHS Beanie",
-    "BHS Blazer",
-    "BHS Cardigan",
-    "BHS Jacket",
-    "BHS Lavalava",
-    "BHS Long-sleeved shirt",
-    "BHS PE Shorts",
-    "BHS PE Top",
-    "BHS Scarf",
-    "BHS Short-sleeved shirt",
-    "BHS Shorts",
-    "BHS Skirt",
-    "BHS Sleveless vest",
-    "BHS Socks",
-    "BHS Tie",
-    "BHS Tights",
-    "BHS Tracksuit",
-    "BHS Trousers",
-    "BHS V-necked jersey",
-    "Blazer",
-    "Cap",
-    "Cardigan",
-    "Coat",
-    "Dress",
-    "Hair tie",
-    "Hat",
-    "Hoodie",
-    "Jacket",
-    "Jandals",
-    "Jeans",
-    "Jersey",
-    "Long Skirt",
-    "Long-sleeved Shirt",
-    "Pants",
-    "Scarf",
-    "Shirt",
-    "Shorts",
-    "Skirt",
-    "Socks",
-    "T-Shirt",
-    "Tank top",
-    "Tie",
-    "Tights",
-    "Other"
-]
-COLOUR_LIST = [
-    "BHS Uniform",
-    "Red",
-    "Orange",
-    "Yellow",
-    "Light Green",
-    "Dark Green",
-    "Light Blue",
-    "Dark Blue",
-    "Navy Blue",
-    "Purple",
-    "Pink",
-    "Light Brown/Tan",
-    "Dark Brown",
-    "White",
-    "Light Grey",
-    "Dark Grey",
-    "Black",
-    "Cream",
-    "Gold",
-    "Silver"
-]
-LOCATION_LIST = [
-    'N/A',
-    'A block',
-    'B block',
-    'C block',
-    'D block',
-    'D Extension',
-    'E block',
-    'G block',
-    'H block',
-    'K block',
-    'Learning Centre',
-    'M block',
-    'N block',
-    'P block',
-    'R block',
-    'X block',
-    'Aurora Centre',
-    'Green Room',
-    'Library',
-    'Office/Administration block',
-    'Quad',
-    'Cross Gym',
-    'Hunter Gym',
-    'Hall',
-    'Upper Court',
-    'Pool',
-    'Upper Fields',
-    'Lower Fields',
-]
+import auth
 
 
 # Functions
+def get_item_type(name):
+    '''
+    Looks up an item type by the name the form sends.
+    Inputs: name
+    Outputs: the ItemType row, or None if there is no item type with that name
+    '''
+    return ItemType.query.filter_by(name=name).first()
+
+
+def get_location(name):
+    '''
+    Looks up a location by the name the form sends.
+    Inputs: name
+    Outputs: the Location row, or None if there is no location with that name
+    '''
+    return Location.query.filter_by(name=name).first()
+
+
+def get_colours(names):
+    '''
+    Looks up colours by the names the form sends.
+    Inputs: names (a list of colour names)
+    Outputs: a list of Colour rows. Any name that isn't in the colour table
+    is simply missing from the list, so comparing lengths shows if all were valid
+    '''
+    names = list(set(names))
+    if not names:
+        return []
+    return Colour.query.filter(Colour.name.in_(names)).all()
+
+
 def validate_item_data(item_type,
                        item_colours,
                        time_found,
@@ -148,25 +78,28 @@ def validate_item_data(item_type,
     Inputs: item_type, item_colours, size, nametag, notes
     Outputs: is_valid, error_message
     '''
-    if item_type not in ITEM_TYPE_LIST:
-        return False, 'Please provide a item type'
 
-    for colour in item_colours:
-        if colour not in COLOUR_LIST:
-            return False, 'Please provide valid colours'
+    # item type has to exist in the item_type table
+    if get_item_type(item_type) is None:
+        return False, 'Please provide an item type'
+
+    # every colour has to exist in the colour table
+    if len(get_colours(item_colours)) != len(set(item_colours)):
+        return False, 'Please provide valid colours'
 
     if time_found is not None:
         try:
             # formatting the time format so it can be compared properly
             time_found_formatted = datetime.strptime(time_found, "%Y-%m-%dT%H:%M")
             print(time_found_formatted)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError):  # time doenst align with the format
             return False, "Please provide a valid date and time."
 
         if time_found_formatted > datetime.now():
             return False, "The date and time cannot be in the future."
 
-    if location not in LOCATION_LIST:
+    # location has to exist in the location table
+    if get_location(location) is None:
         return False, 'Please provide a valid location'
 
     if size is not None and len(size) > 10:
@@ -274,14 +207,37 @@ class LostItem(db.Model):
     __tablename__ = 'lost_item'
     item_id = db.Column(db.Integer, primary_key=True)
     finder_id = db.Column(db.String(6), db.ForeignKey('user.user_id'))
-    item_type = db.Column(db.String(50))
+
+    type_id = db.Column('item_type', db.Integer, db.ForeignKey('item_type.type_id'))
     time_found = db.Column(db.String(50))
     size = db.Column(db.String(50))
     nametag = db.Column(db.String(50))
-    location = db.Column(db.String(50))
+
+    location = db.Column(db.Integer, db.ForeignKey('location.location_id'))
     status = db.Column(db.String(50))
     notes = db.Column(db.String(50))
+    type = db.relationship('ItemType', backref='lost_items')
+    place = db.relationship('Location', backref='lost_items')
     colours = db.relationship('Colour', secondary='lostitem_colour', backref='lost_items')
+
+    @property
+    def item_type(self):
+        '''The name of the item type, so templates can show the type name'''
+        return self.type.name if self.type else None
+
+
+class ItemType(db.Model):
+    '''Database table containing item_type information'''
+    __tablename__ = 'item_type'
+    type_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+
+
+class Location(db.Model):
+    '''Database table containing location information'''
+    __tablename__ = 'location'
+    location_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
 
 
 class Colour(db.Model):
@@ -385,19 +341,16 @@ def upload():
             return redirect('/upload')
 
         item = LostItem(finder_id=finder_id,
-                        item_type=item_type,
+                        type=get_item_type(item_type),
                         time_found=time_found,
                         size=size,
                         nametag=nametag,
-                        location=location,
+                        place=get_location(location),
                         status=status,
                         notes=notes)
 
-        for item_colour in item_colours:
-            # checking if colour is valid
-            colour = Colour.query.filter_by(name=item_colour).first()
-            if colour:
-                item.colours.append(colour)
+        # Colours have already been validated so they can all be added
+        item.colours = get_colours(item_colours)
 
         db.session.add(item)
         db.session.commit()
@@ -440,19 +393,16 @@ def find():
             return redirect('/find')
 
         item = LostItem(finder_id=finder_id,
-                        item_type=item_type,
+                        type=get_item_type(item_type),
                         time_found=time_missing,
                         size=size,
                         nametag=nametag,
-                        location=location,
+                        place=get_location(location),
                         status=status,
                         notes=notes)
 
-        # Adding colours one at a time
-        for item_colour in item_colours:
-            colour = Colour.query.filter_by(name=item_colour).first()
-            if colour:
-                item.colours.append(colour)
+        # Colours have already been validated so they can all be added
+        item.colours = get_colours(item_colours)
 
         db.session.add(item)
         db.session.commit()
@@ -496,10 +446,9 @@ def admin():
                                error_title='Forbidden',
                                error_message='You do not have permission to access this page')
 
-    lost_and_found_query = LostItem.query.filter_by(status='LOST AND FOUND')
-    missing_items_query = LostItem.query.filter_by(status='LOOKING FOR')
-    returned_items_query = LostItem.query.filter_by(status='RETURNED')
-    recieved_items_query = LostItem.query.filter_by(status='FOUND')
+    # Filters are only added if they have been applied, and the same filters
+    # are used for every status so all four lists stay consistent
+    filters = []
 
     if request.method == 'POST':
         finder_id = request.form.get('finder_id')
@@ -507,64 +456,23 @@ def admin():
         colours = request.form.getlist('colours[]')
         location = request.form.get('location') or None
 
-        # Applying the filters only if the filter has been applied
         if finder_id:  # Filtering by finder_id
-            lost_and_found_query = lost_and_found_query.filter(
-                LostItem.finder_id == finder_id
-            )
-            missing_items_query = missing_items_query.filter(
-                LostItem.finder_id == finder_id
-            )
-            returned_items_query = returned_items_query.filter(
-                LostItem.finder_id == finder_id
-            )
-            recieved_items_query = recieved_items_query.filter(
-                LostItem.finder_id == finder_id
-            )
-        if item_type != 'None':  # Filtering by item type
-            lost_and_found_query = lost_and_found_query.filter(
-                LostItem.item_type == item_type
-            )
-            missing_items_query = missing_items_query.filter(
-                LostItem.item_type == item_type
-            )
-            returned_items_query = returned_items_query.filter(
-                LostItem.item_type == item_type
-            )
-            recieved_items_query = recieved_items_query.filter(
-                LostItem.item_type == item_type
-            )
-        if colours:  # FIltering by colours
-            lost_and_found_query = lost_and_found_query.filter(
-                LostItem.colours.any(Colour.name.in_(colours))
-            )
-            missing_items_query = missing_items_query.filter(
-                LostItem.colours.any(Colour.name.in_(colours))
-            )
-            returned_items_query = returned_items_query.filter(
-                LostItem.colours.any(Colour.name.in_(colours))
-            )
-            recieved_items_query = recieved_items_query.filter(
-                LostItem.colours.any(Colour.name.in_(colours))
-            )
-        if location != 'None':  # Filtering by location
-            lost_and_found_query = lost_and_found_query.filter(
-                LostItem.location == location
-            )
-            missing_items_query = missing_items_query.filter(
-                LostItem.finder_id == finder_id
-            )
-            returned_items_query = returned_items_query.filter(
-                LostItem.finder_id == finder_id
-            )
-            recieved_items_query = recieved_items_query.filter(
-                LostItem.finder_id == finder_id
-            )
+            filters.append(LostItem.finder_id == finder_id)
+        if item_type and item_type != 'None':  # Filtering by item type name
+            filters.append(LostItem.type.has(ItemType.name == item_type))
+        if colours:  # Filtering by colours
+            filters.append(LostItem.colours.any(Colour.name.in_(colours)))
+        if location and location != 'None':  # Filtering by location
+            filters.append(LostItem.place.has(Location.name == location))
 
-    lost_and_found_items = lost_and_found_query.all()
-    missing_items = missing_items_query.all()
-    returned_items = returned_items_query.all()
-    recieved_items = recieved_items_query.all()
+    def get_items(status):
+        '''Gets all the items with a status that match the applied filters'''
+        return LostItem.query.filter(LostItem.status == status, *filters).all()
+
+    lost_and_found_items = get_items('LOST AND FOUND')
+    missing_items = get_items('LOOKING FOR')
+    returned_items = get_items('RETURNED')
+    recieved_items = get_items('FOUND')
 
     for item in lost_and_found_items + missing_items:
         item.colour_names = [colour.name for colour in item.colours]
@@ -631,7 +539,7 @@ def return_item(looking_for_item_id, item_match_id):
 
     # sending email
     recipient_school_code = looking_for_item.finder_id
-    recipient_item_type = looking_for_item.item_type
+    recipient_item_type = looking_for_item.type.name
     try:
         recipient = f"{recipient_school_code}{auth.domain_name}"
         # Sending the email in the background so redirect can occur immediatly
@@ -669,7 +577,7 @@ def request_info(item_id):
         abort(404)
     # sending email
     school_code = looking_for_item.finder_id
-    item_type = looking_for_item.item_type
+    item_type = looking_for_item.type.name
 
     try:
         print('Sending email')
@@ -731,7 +639,7 @@ def promote(user_id):
     else:
         account.clearance -= 1
         db.session.commit()
-        flash('User successfully promote')
+        flash('User successfully promoted')
         return redirect('/account_manager')
 
 
@@ -781,32 +689,36 @@ def item(item_id):
     colour_names = [colour.name for colour in item.colours]
 
     if request.method == 'POST':
-        item.item_type = request.form.get('item_type')
+        # Reading into variables first. The item is only changed once the data
+        # is validated, otherwise the validation queries would flush half-edited data
+        item_type = request.form.get('item_type')
         item_colours = request.form.getlist('colours[]')
-        item.time_found = request.form.get('time_found') or None
-        item.size = request.form.get('size') or None
-        item.nametag = request.form.get('nametag') or None
-        item.location = request.form.get('location') or None
-        item.notes = request.form.get('notes') or None
+        time_found = request.form.get('time_found') or None
+        size = request.form.get('size') or None
+        nametag = request.form.get('nametag') or None
+        location = request.form.get('location') or None
+        notes = request.form.get('notes') or None
 
         # backend data check for item data
-        is_valid, error_message = validate_item_data(item.item_type,
+        is_valid, error_message = validate_item_data(item_type,
                                                      item_colours,
-                                                     item.time_found,
-                                                     item.size,
-                                                     item.nametag,
-                                                     item.location,
-                                                     item.notes)
+                                                     time_found,
+                                                     size,
+                                                     nametag,
+                                                     location,
+                                                     notes)
         if not is_valid:
             flash(error_message)
             return redirect(f'/item/{item_id}')
 
-        # Clearning original colours
-        item.colours.clear()
-        for item_colour in item_colours:
-            colour = Colour.query.filter_by(name=item_colour).first()
-            if colour:
-                item.colours.append(colour)
+        item.type = get_item_type(item_type)
+        item.time_found = time_found
+        item.size = size
+        item.nametag = nametag
+        item.place = get_location(location)
+        item.notes = notes
+        # Replaces the original colours with the new ones
+        item.colours = get_colours(item_colours)
 
         db.session.commit()
         flash('Item updated successfully')
@@ -852,11 +764,7 @@ def login():
             flash('School code is incorrect')
             return redirect('/login')
 
-        # Hashing the inputted password and comparing the hashes
-        h = hashlib.new('SHA256')
-        h.update(inputted_password.encode())
-        hashed_inputted_password = h.hexdigest()
-        if account.password == hashed_inputted_password:
+        if check_password_hash(account.password, inputted_password):
             print('Successful login')
             login_user(account)
             flash('Successful login, welcome')
@@ -985,10 +893,7 @@ def confirm():
 
         if int(confirmation_number) == correct_number:
             # Successful account creation
-            # Hashing the password
-            h = hashlib.new('SHA256')
-            h.update(password.encode())
-            hashed_password = h.hexdigest()
+            hashed_password = generate_password_hash(password)
 
             # Adding the account into the database
             add = User(first_name=first_name,
@@ -1035,14 +940,7 @@ def settings():
         current_hashed_password = current_user.password
         print(current_hashed_password)
 
-        # Checking if the old passwords match
-        # Hashing old password to compare the hashes to the current password
-        h = hashlib.new("SHA256")
-        h.update(old_password.encode())
-        old_hashed_password = h.hexdigest()
-
-        # checking that the hashed passwords match
-        if old_hashed_password != current_hashed_password:
+        if not check_password_hash(current_hashed_password, old_password):
             flash('Incorrect password')
             return redirect('/settings')
 
@@ -1057,10 +955,7 @@ def settings():
             flash("Your password must have a number or special character")
             return redirect('/settings')
         else:  # The password is valid
-            # Hashing the new password
-            h = hashlib.new("SHA256")
-            h.update(new_password.encode())
-            new_hashed_password = h.hexdigest()
+            new_hashed_password = generate_password_hash(new_password)
             account = User.query.filter_by(school_code=current_user.school_code).first_or_404()
             account.password = new_hashed_password
             db.session.commit()
@@ -1091,12 +986,7 @@ def delete_account():
             flash('Please check the checkbox and input your password to proceed')
             return redirect('/delete_account')
 
-        # Checking if password is correct
-        # Hashing inputted password
-        h = hashlib.new("SHA256")
-        h.update(inputted_password.encode())
-        hashed_inputted_password = h.hexdigest()
-        if hashed_inputted_password == current_user.password:
+        if check_password_hash(current_user.password, inputted_password):
             print(f'Deleting the account of {current_user.school_code}')
             account = User.query.filter_by(school_code=current_user.school_code).first_or_404()
             # Delete all lost items and their colours associated with the user
