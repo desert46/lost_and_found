@@ -1,5 +1,5 @@
 '''
-This is a project start during 18/04/2026 and ended xx/08/2026.
+This is a project start during 18/04/2026 and ended 25/09/2026.
 This project focuses on the lost proptery system at BHS.
 The goal of this project is to digitise the current lost property system.
 '''
@@ -91,7 +91,6 @@ def validate_item_data(item_type,
         try:
             # formatting the time format so it can be compared properly
             time_found_formatted = datetime.strptime(time_found, "%Y-%m-%dT%H:%M")
-            print(time_found_formatted)
         except (ValueError, TypeError):  # time doenst align with the format
             return False, "Please provide a valid date and time."
 
@@ -218,7 +217,9 @@ class LostItem(db.Model):
     notes = db.Column(db.String(50))
     type = db.relationship('ItemType', backref='lost_items')
     place = db.relationship('Location', backref='lost_items')
-    colours = db.relationship('Colour', secondary='lostitem_colour', backref='lost_items')
+    colours = db.relationship('Colour',
+                              secondary='lostitem_colour',
+                              backref='lost_items')
 
     @property
     def item_type(self):
@@ -675,7 +676,6 @@ def demote(user_id):
 def item(item_id):
     '''Route for the item page where users can edit their items'''
     item = LostItem.query.get_or_404(item_id)
-    print(item.status == 'LOST AND FOUND')
     if item.status != 'LOOKING FOR' and item.status != 'LOST AND FOUND':
         abort(404)
 
@@ -732,8 +732,6 @@ def item(item_id):
 def delete(item_id):
     '''Route for deleting an item, only the finder of the item or an admin can delete it'''
     item = LostItem.query.get_or_404(item_id)
-    print('test')
-    print(item)
     if current_user.clearance > 1:   # Clearance check
         # If the user isnt an admin, they need to be the finder of the item
         if current_user.school_code != item.finder_id:
@@ -765,7 +763,6 @@ def login():
             return redirect('/login')
 
         if check_password_hash(account.password, inputted_password):
-            print('Successful login')
             login_user(account)
             flash('Successful login, welcome')
             session['clearance'] = account.clearance
@@ -788,7 +785,7 @@ def signup():
     '''
     # prevent logged in users from accessing the page
     if current_user.is_authenticated:
-            return redirect('/dashboard')
+        return redirect('/dashboard')
 
     if request.method == 'POST':
         first_name = request.form.get('first_name').strip()
@@ -831,7 +828,6 @@ def signup():
 
         # Checking that this account doesn't already exist
         existing_users = User.query.filter_by(school_code=school_code).first()
-        print(existing_users)
         if existing_users is not None:
             flash('This account already exists')
             return redirect('/signup')
@@ -844,6 +840,7 @@ def signup():
 
         # Generate random 6 digit confirmation code
         correct_number = random.randint(100000, 999999)
+        print(correct_number)
         session['correct_number'] = correct_number
 
         try:
@@ -869,9 +866,7 @@ def signup():
 @app.route('/confirm', methods=['POST', 'GET'])
 def confirm():
     '''Confirmation email route'''
-
     # getting variables from the session
-    print('confirm route')
     first_name = session.get('first_name')
     last_name = session.get('last_name')
     school_code = session.get('school_code')
@@ -889,7 +884,6 @@ def confirm():
         if confirmation_number is None or confirmation_number == '':
             flash('Please enter a valid confirmation number')
             return redirect('/confirm')
-        print(confirmation_number)
 
         if int(confirmation_number) == correct_number:
             # Successful account creation
@@ -938,7 +932,6 @@ def settings():
         old_password = request.form.get('old_password')
         new_password = request.form.get('new_password')
         current_hashed_password = current_user.password
-        print(current_hashed_password)
 
         if not check_password_hash(current_hashed_password, old_password):
             flash('Incorrect password')
@@ -1014,13 +1007,9 @@ def about():
     '''
     Route for about page. Page contains general information about the site
     '''
-    print('2')
     clearance = session.get('clearance')
     if clearance is None:
-        print(3)
         clearance = 5
-    print(type(clearance))
-    print(clearance)
     return render_template('about.html',
                            clearance=clearance,
                            title='About',)
@@ -1067,5 +1056,5 @@ def forbidden(e):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
-# DONEZO
+    app.run(debug=False)
+# DONEZO!
